@@ -1,0 +1,18 @@
+@import "https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap";
+@import "https://fonts.googleapis.com/css2?family=Roboto&display=swap";
+
+body{margin:0;padding:0;background-color:#000}*{text-decoration:none}
+
+.con1{min-height:70px;max-width:1200px;width:100%;margin:auto;margin-bottom:10px;text-align:center;box-shadow:0 0 18px rgba(175,174,174,.3)}
+
+.con1 .con2 .con3{background-color:#1a2026;width:100%;min-height:55px;display:grid;grid-template-columns:60px 1fr;cursor:pointer;text-align:left;margin-top:2px;transition:.5s}
+
+.tim{position:relative;display:flex;;color:#ff0000;align-items:center;left:5px;justify-content:center}
+
+.con1 .con2 .con3:hover{background-color:#018e39}
+
+.con1 .con2 .cat .txt{display:inline-flex;padding-left:15px;align-items:center}
+
+.con1 .con2 .cat .txt span{margin:0;padding:0;color:#fff;text-transform:uppercase;font-size:1rem;font-family:roboto,sans-serif}
+
+.con1 .con2 .cat .txt .name{margin:0;padding:0;color:#fff;font-size:1rem;font-family:roboto,sans-serif}

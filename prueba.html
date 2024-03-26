@@ -1,0 +1,11 @@
+<!DOCTYPE html> 
+<html> <head> 
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script> 
+  <title>Mitology TV</title> 
+  <style type="text/css"> 
+   <script> var player = new Clappr.Player(
+    { 
+     source: "https://pv10.soft4game.com/o51a/stream12/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9My8xNS8yMDI0IDExOjAwOjAwIFBNJmhhc2hfdmFsdWU9RnR4ODAvVWhjam0rUlB1Z0tQL09XQT09JnZhbGlkbWludXRlcz0xMjAmaWQ9NQ==", 
+       parentId: "#clappr", width: '100%', height: '100%', 
+    autoPlay: true, }); </script> 
+    <script> document.getElementById('toggleFullscreen').addEventListener('click', function() { toggleFullScreenHandler('clappr'); }, false); function toggleFullScreenHandler(targetId) { var target = document.getElementById(targetId); if (target.requestFullscreen) { target.requestFullscreen(); } else if (target.mozRequestFullScreen) { target.mozRequestFullScreen(); } else if (target.webkitRequestFullscreen) { target.webkitRequestFullscreen(); } else if (target.msRequestFullscreen) { target.msRequestFullscreen(); } } </script> </body> </html>

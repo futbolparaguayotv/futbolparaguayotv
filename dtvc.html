@@ -1,0 +1,24 @@
+ <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Clappr Player test</title>
+        <!-- clappr script -->
+        <script src="//cdn.jsdelivr.net/clappr/latest/clappr.min.js"></script>
+      
+<!--         <script src="//api.peer5.com/peer5.js?id=hncnga30rl0bv44xqbvy"></script> -->
+<!--         <script src="//api.peer5.com/peer5.clappr.plugin.js"></script> -->
+        <script>if (window.peer5) peer5.showStats();</script>
+    </head>
+    <body>
+        <div id="player"></div>
+        <script>
+            var player = new Clappr.Player({
+         source: 'https://pv10.soft4game.com/o51a/stream284/o/stream284/chunks.m3u8?nimblesessionid=32361396&wmsAuthSign=c2VydmVyX3RpbWU9My8xOC8yMDI0IDU6MDA6MDAgUE0maGFzaF92YWx1ZT15V2JKSk40ZndpQVNaTGxiSmJURlZ3PT0mdmFsaWRtaW51dGVzPTEyMCZpZD01',
+  poster: 'http://clappr.io/poster.png',
+  mute: true,
+  height: 360,
+  width: 640
+});
+        </script>
+    </body>
+</html>
