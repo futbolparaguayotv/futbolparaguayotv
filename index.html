@@ -196,12 +196,12 @@
 
                     if (url !== "#") {
                         // Modificar la URL según tus requisitos
-                        let nurl = url.replace("/embed/eventos/?r=", "");
+                        let nurl = url.replace("futbolparaguayotv/star.html?get=", "");
                         nurl = atob(nurl);
                         let wurl = nurl.replace("", "");
-                        wurl = "/reproductores/starplus?get=" + wurl;
+                        wurl = "futbolparaguayotv/star.html?get=" + wurl;
                         let furl = btoa(wurl);
-                        url = "/embed/eventos/?r=" + furl;
+                        url = "futbolparaguayotv/star.html?get=" + furl;
                     }
 
                     if (obj['status'] == "EN VIVO") {
