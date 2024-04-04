@@ -89,12 +89,12 @@ Fútbol Play TV
 
                     if (url !== "#") {
                         // Modificar la URL según tus requisitos
-                        let nurl = url.replace("/embed/eventos/?r=", "");
+                        let nurl = url.replace("/embed/eventos.html=", "");
                         nurl = atob(nurl);
                         let wurl = nurl.replace("", "");
                         wurl = "/reproductores/starplus?get=" + wurl;
                         let furl = btoa(wurl);
-                        url = "/embed/eventos/?r=" + furl;
+                        url = "/embed/eventos.html=" + furl;
                     }
 
                     if (obj['status'] == "EN VIVO") {
