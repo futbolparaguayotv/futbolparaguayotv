@@ -20,7 +20,7 @@
         {
           "name": "Channel Widevine",
           "drm_id": "drm_wv",
-          "stream_url": "https://.../widevine.mpd"
+          "stream_url": "http://pylocalmillicom.lcdn.une.net.co/VMX4_widevine/rolling-buffer/FoxSports/FoxSports/transmux/index.m3u8?ccur_fmt_type=fmp4"
         },
         {
           "name": "Channel PlayReady",
@@ -61,7 +61,7 @@
       "drm_id": "drm_wv",
       "drm_type": "widevine",
       "drm_key": "https://mrpw.milcom.vcas.na1.verimatrixcloud.net:8063?deviceId=MmRmZjY2MjQtMGZjOS0zYTFlLTgxMjMtYzJhNzM5ODU2YjFj"
-      "stream_url": "http://pylocalmillicom.lcdn.une.net.co/VMX4_widevine/rolling-buffer/FoxSports/FoxSports/transmux/index.m3u8?ccur_fmt_type=fmp4"
+      
     },
     {
       "drm_id": "drm_pr",
