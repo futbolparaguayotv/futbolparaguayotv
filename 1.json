@@ -25,7 +25,7 @@
         {
           "name": "Channel PlayReady",
           "drm_id": "drm_pr",
-          "stream_url": "https://.../playready.mpd"
+          "stream_url": "https://..da/playready.mpd"
         }
       ]
     },
