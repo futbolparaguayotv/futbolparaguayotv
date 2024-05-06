@@ -1,8 +1,8 @@
 <?php
 $license_json = '{
-    "payload": "",
+    "payload": "https://mrpw.milcom.vcas.na1.verimatrixcloud.net:8063?deviceId=NjUwYjgzODYtMDNkZS0zMWUzLTliZTUtNWNkOGRlMzU5YWY2",
     "content_id": "Evento Star - Test",
-    "provider": "/",
+    "provider": "https://onetv.tigo.com/",
     "allowed_track_types": "SD_ONLY",
     "content_key_specs": [
         { "track_type": "SD" }
