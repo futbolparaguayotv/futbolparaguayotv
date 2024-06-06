@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<tv generator-info-name="WebGrab+Plus/w MDB &amp; REX Postprocess -- version  V3.2.0.0 -- Jan van Straaten" generator-info-url="http://www.webgrabplus.com">
+  <channel id="TRECE">
+    <display-name lang="es">TRECE</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="LA TELE">
+    <display-name lang="es">LA TELE</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="GEN">
+    <display-name lang="es">GEN</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="SNT">
+    <display-name lang="es">SNT</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="TELEFUTURO">
+    <display-name lang="es">TELEFUTURO</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="C9N">
+    <display-name lang="es">C9N</display-name>
+    <url>http://www.tigo.com.py</url>
+  </channel>
+  <channel id="DIRECTV(DTV)(101)">
+    <display-name lang="es">DIRECTV(DTV)(101)</display-name>
+    <url>http://www.directv.com.ar</url>
+  </channel>
+  <channel id="América TV (ARG)(AME2)(120)">
+    <display-name lang="es">América TV (ARG)(AME2)(120)</display-name>
+    <url>http://www.directv.com.ar</url>
+  </channel>
+  <channel id="La TV Pública (ARG)(CAN7)(121)">
+    <display-name lang="es">La TV Pública (ARG)(CAN7)(121)</display-name>
+    <url>http://www.directv.com.ar</url>
+  </channel>
+</tv>
