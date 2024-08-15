@@ -1,0 +1,62 @@
+<html>
+<head>
+<!-- for non-UI builds: -->
+<script src="https://ajax.googleapis.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
+<!-- or, for UI builds: -->
+<script src="https://ajax.googleapis.com/ajax/libs/shaka-player/3.2.0/shaka-player.ui.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/shaka-player/3.2.0/controls.css">
+  <style>
+    body {
+        width:100%;
+        height: 100%;
+        font-family: Poppins;
+        display:block;
+        position: absolute;
+        padding: 0px;
+        margin: 0px;
+        background: #000;
+    }
+    video{
+        width:100%;
+        height: 100%;
+        display:inline-block;
+        -webkit-user-select:none;
+        -moz-user-select:none;
+        -ms-user-select:none;
+        user-select:none;
+    }
+ a, a:hover, a:focus, a:active {
+      text-decoration: none;
+ }
+
+</style>
+    <style>
+        div a img{visibility:hidden;}
+body::before {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 10;
+        content: '';
+        height: 70px;
+        width: 110px;
+        background: url('https://3.bp.blogspot.com/-swALdaKJT4k/YFYW0p1MkMI/AAAAAAAABkc/VJkuL3kmJMgVx5jODsIN95jvvrKlQ154wCK4BGAYYCw/s1600/Sin%2Bt%25C3%25ADtulo-1.png') no-repeat;
+        background-size: 110px auto, auto;
+        opacity: 0.4;
+    }
+</style>
+</head>
+<body>
+<center>   <div data-shaka-player-container style="">
+       <!-- The data-shaka-player tag will make the UI library use this video element.
+            If no video is provided, the UI will automatically make one inside the container div. -->
+         
+        <video autoplay data-shaka-player id="video" poster="" style="width:100%;height:100%"></video>
+    </div>
+    </div></center>
+<script>
+
+eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('3 d=\'q://r-e-s.t.u.e/v-w/x/y/z-A/f/f/B/C.D?E=F\';G 4 g(){3 5=8.H(\'5\');3 0=5[\'0\'];3 9=0.I();3 1=9.J();1.K({L:{M:{\'N\':\'O\',}}});h.1=1;h.0=0;1.6(\'2\',i);9.6(\'2\',j);P{Q 1.b(d);c.R(\'S 5 T U V k!\')}W(2){7(2)}}4 i(a){7(l.m)}4 7(a){c.2(\'X n\',a.n,\'Y\',a)}4 j(a){7(l.m)}4 o(a){c.2(\'Z 10 b 11 12 13!\')}8.6(\'p-0-k\',g);8.6(\'p-0-b-14\',o);',62,67,'ui|player|error|const|function|video|addEventListener|onPlayerError|document|controls||load|console|manifestUri|bo|ESPN2HDBO|init|window|onPlayerErrorEvent|onUIErrorEvent|loaded|event|detail|code|initFailed|shaka|https|sam|cach02|tigo|com|ccur|session|01_44790322|VMX4_widevine|rolling|buffer|transmux|index|mpd|ccur_fmt_type|fmp4|async|getElementById|getControls|getPlayer|configure|drm|clearKeys|150440c0d02758967650ad85b26f9295|8eeed05f0d55606e9b34eb4947ab4b23|try|await|log|The|has|now|been|catch|Error|object|Unable|to|the|UI|library|failed'.split('|'),0,{}))
+   </script>
+</body>
+</html>
