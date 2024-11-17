@@ -1,8 +1,51 @@
+<script src="//ssl.p.jwpcdn.com/player/v/8.21.0/jwplayer.js"></script>
+<script> jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
 
+        window.addEventListener('contextmenu', function (e) {
+            e.preventDefault(); // Bloquea el menú contextual (clic derecho)
+            window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta hacer clic derecho
+        });
+  
+
+
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 123)) { // Ctrl+U, Ctrl+S, F12
+                e.preventDefault(); // Bloquea Ctrl+U, Ctrl+S, F12
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar estas combinaciones de teclas
+            }
+        });
+
+        window.addEventListener('keyup', function (e) {
+            if (e.keyCode === 123) { // F12 (suelta la tecla)
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar F12
+            }
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { // Ctrl+Shift+I
+                e.preventDefault(); // Bloquea Ctrl+Shift+I
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        window.addEventListener('keypress', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) { // Ctrl+Shift+C
+                e.preventDefault(); // Bloquea Ctrl+Shift+C
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        debugger; // Detiene la ejecución para depurar
+   
+  
+  
+  </script>
 <div id="player"></div>
 <script>
 
-    var playerInstance = jwplayer("player");
+    
+var playerInstance = jwplayer("player");
 
     playerInstance.setup({
 
@@ -40,3 +83,6 @@
 		jwplayer("player").on("play", function(e){jwplayer("player").setCurrentAudioTrack(0)});
 	</script>
     <body>
+      
+      
+      
