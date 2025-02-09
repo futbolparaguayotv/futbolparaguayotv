@@ -1,88 +1,54 @@
-<script src="//ssl.p.jwpcdn.com/player/v/8.21.0/jwplayer.js"></script>
-<script> jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
 
-        window.addEventListener('contextmenu', function (e) {
-            e.preventDefault(); // Bloquea el menú contextual (clic derecho)
-            window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta hacer clic derecho
-        });
-  
+<head>
 
+<script src="/cdn-cgi/apps/head/ulIRyxHn-1bIcLYrnVKNzXXyMy8.js"></script><script src="//cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/mux.js@5.6.7/dist/mux.min.js"></script>
+<script src='//cdn.jsdelivr.net/npm/level-selector@latest/dist/level-selector.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-chromecast-plugin@latest/dist/clappr-chromecast-plugin.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-pip@latest/dist/clappr-pip.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-playback-rate-plugin@latest/dist/clappr-playback-rate-plugin.min.js'></script>
+<script src="//cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/cdnbye-shaka@latest"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+<style> 
+.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] {
+    height: 5px !important; }.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar]:hover .bar-background[data-seekbar] {
+    height: 7px !important;}.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] .bar-fill-1[data-seekbar] {
+    background-color: red !important;}.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] {background-color: rgba(255, 255, 255, 0.2) !important; }
+.player-poster[data-poster] {
+  background-size: cover;
+}
+body{
+  margin:0;
+  padding:0;
+}
 
-
-        window.addEventListener('keydown', function (e) {
-            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 123)) { // Ctrl+U, Ctrl+S, F12
-                e.preventDefault(); // Bloquea Ctrl+U, Ctrl+S, F12
-                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar estas combinaciones de teclas
-            }
-        });
-
-        window.addEventListener('keyup', function (e) {
-            if (e.keyCode === 123) { // F12 (suelta la tecla)
-                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar F12
-            }
-        });
-
-        window.addEventListener('keydown', function (e) {
-            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { // Ctrl+Shift+I
-                e.preventDefault(); // Bloquea Ctrl+Shift+I
-                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
-            }
-        });
-
-        window.addEventListener('keypress', function (e) {
-            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) { // Ctrl+Shift+C
-                e.preventDefault(); // Bloquea Ctrl+Shift+C
-                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
-            }
-        });
-
-        debugger; // Detiene la ejecución para depurar
-   
-  
-  
-  </script>
+</style>
+</head>
 <div id="player"></div>
 <script>
-
-    
-var playerInstance = jwplayer("player");
-
-    playerInstance.setup({
-
-        playlist: [{
-            "title": "REPRODUCTOR",
-           "image": "",
-          "description": "EN VIVO",
-            "sources": [
-                {
-                    "default": false,  
-                    "type": "dash",
-                    "file": 'https://sam-py-edge02.tigo.com.py/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd',
-                    "drm": {
-                        "clearkey": { "keyId":  "1c62a216a5fe423f959cb1ca02f62d83", "key": "54f2fdc83c1da33cd9269bf21e08218c"  }
-                    },
-                    "label": "0"
+var player = new Clappr.Player({
+        source: 'https://sam-py-edge02.tigo.com.py/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd',
+        mimeType: 'application/x-mpegURL',
+        height: '100%',
+       autoPlay: false,
+        width: '100%',
+        plugins: [LevelSelector, DashShakaPlayback, ChromecastPlugin, ClapprPip.PipButton, ClapprPip.PipPlugin, Clappr.MediaControl],
+        events: {onReady: function() {var plugin = this.getPlugin('click_to_pause'); plugin && plugin.disable();},},
+        chromecast: {
+            appId: '9DFB77C0',
+            contentType: 'video/mp4',
+        },
+        shakaConfiguration: {
+            drm: {
+            clearKeys: {
+                    "1c62a216a5fe423f959cb1ca02f62d83" : "54f2fdc83c1da33cd9269bf21e08218c" 
                 }
-            ]
-        }],
-        width: "100%",
-        height: "100%",
-        aspectratio: "16:9",
-        mute: "false",
-        stretching: "exactfit",
-        autostart: false,
-       skin: {
-           name: "white",
-       active: "white",
-       inactive: "white",
-       background: "#151918"
-    }
-       }
-       );
-       
-		jwplayer("player").on("play", function(e){jwplayer("player").setCurrentAudioTrack(0)});
-	</script>
-    <body>
-      
-      
-      
+            },
+            preferredAudioLanguage: 'pt-BR',
+        },
+        shakaOnBeforeLoad: function (shaka_player) {},
+        parentId: '#player'
+    });
+</script>
