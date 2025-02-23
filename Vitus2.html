@@ -1,1 +1,54 @@
- <!-- Inicio. streaming tv radio hosting USAstreams.com html5 player --><video id=usastreams-video  keyLicencia="2854361USAstreams.COM" crossorigin="anonymous"  class="video-js vjs-fluid vjs-default-skin" autoplay controls poster=''><source src="https://bcovlive-a.akamaihd.net/74f665e9ff8447639d4de4b8b458d8ae/us-east-1/6058004209001/playlist_dvr.m3u8" type="application/x-mpegURL"></video>    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">    <script type="text/javascript" src ="https://unpkg.com/video.js/dist/video.js"></script>    <script type="text/javascript" src ="https://cp.usastreams.com/playerHTML5/ContadorVideo.js"></script>    <link href="https://cp.usastreams.com/playerHTML5/media/tube.css" rel="stylesheet">    <script src="https://unpkg.com/videojs-contrib-hls/dist/videojs-contrib-hls.js"></script>    <script>      (function(window, videojs) {        var player = window.player = videojs('usastreams-video');          return false;        }      (window, window.videojs));    </script><!-- Fin. USAstreams.com html5 player -->
+
+<head>
+
+<script src="/cdn-cgi/apps/head/ulIRyxHn-1bIcLYrnVKNzXXyMy8.js"></script><script src="//cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/mux.js@5.6.7/dist/mux.min.js"></script>
+<script src='//cdn.jsdelivr.net/npm/level-selector@latest/dist/level-selector.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-chromecast-plugin@latest/dist/clappr-chromecast-plugin.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-pip@latest/dist/clappr-pip.min.js'></script>
+<script src='//cdn.jsdelivr.net/npm/clappr-playback-rate-plugin@latest/dist/clappr-playback-rate-plugin.min.js'></script>
+<script src="//cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+<script src="//cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/cdnbye-shaka@latest"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> 
+<style> 
+.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] {
+    height: 5px !important; }.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar]:hover .bar-background[data-seekbar] {
+    height: 7px !important;}.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] .bar-fill-1[data-seekbar] {
+    background-color: red !important;}.media-control[data-media-control] .media-control-layer[data-controls] .bar-container[data-seekbar] .bar-background[data-seekbar] {background-color: rgba(255, 255, 255, 0.2) !important; }
+.player-poster[data-poster] {
+  background-size: cover;
+}
+body{
+  margin:0;
+  padding:0;
+}
+
+</style>
+</head>
+<div id="player"></div>
+<script>
+var player = new Clappr.Player({
+        source: 'http://sam-bo-cach02.tigo.com.bo/ccur-session/01_44790322/VMX4_widevine/rolling-buffer/TIGOSPORTSBO/TIGOSPORTSBO/transmux/index.mpd?ccur_fmt_type=fmp4',
+        mimeType: 'application/x-mpegURL',
+        height: '100%',
+       autoPlay: false,
+        width: '100%',
+        plugins: [LevelSelector, DashShakaPlayback, ChromecastPlugin, ClapprPip.PipButton, ClapprPip.PipPlugin, Clappr.MediaControl],
+        events: {onReady: function() {var plugin = this.getPlugin('click_to_pause'); plugin && plugin.disable();},},
+        chromecast: {
+            appId: '9DFB77C0',
+            contentType: 'video/mp4',
+        },
+        shakaConfiguration: {
+            drm: {
+            clearKeys: {
+                    "0eec1f8b89569a1a76c92ed76490be7b" : "a1abf1c31ed60f2bc0d540cef9214122" 
+                }
+            },
+            preferredAudioLanguage: 'pt-BR',
+        },
+        shakaOnBeforeLoad: function (shaka_player) {},
+        parentId: '#player'
+    });
+</script>
