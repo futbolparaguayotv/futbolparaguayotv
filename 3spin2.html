@@ -1,5 +1,6 @@
 <html>
 <head>
+  <script type='text/javascript' src='//strewviolently.com/55/e8/cb/55e8cb90311be645dd27b181f2cf3730.js'></script>
 <!-- for non-UI builds: -->
 <script src="https://ajax.googleapis.com/ajax/libs/shaka-player/3.2.0/shaka-player.compiled.js"></script>
 <!-- or, for UI builds: -->
@@ -121,5 +122,40 @@ document.addEventListener('shaka-ui-loaded', init);
 // to load (e.g. due to lack of browser support).
 document.addEventListener('shaka-ui-load-failed', initFailed);
    </script>
+  <script>
+        window.addEventListener('contextmenu', function (e) {
+            e.preventDefault(); // Bloquea el menú contextual (clic derecho)
+            window.location.href = 'https://www.futbolparaguayotv.xyz/'; // Redirige a tu web principal si alguien intenta hacer clic derecho
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 123)) { // Ctrl+U, Ctrl+S, F12
+                e.preventDefault(); // Bloquea Ctrl+U, Ctrl+S, F12
+                window.location.href = 'https://www.futbolparaguayotv.xyz/'; // Redirige a tu web principal si alguien intenta usar estas combinaciones de teclas
+            }
+        });
+
+        window.addEventListener('keyup', function (e) {
+            if (e.keyCode === 123) { // F12 (suelta la tecla)
+                window.location.href = 'https://www.futbolparaguayotv.xyz/'; // Redirige a tu web principal si alguien intenta usar F12
+            }
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { // Ctrl+Shift+I
+                e.preventDefault(); // Bloquea Ctrl+Shift+I
+                window.location.href = 'https://www.futbolparaguayotv.xyz/'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        window.addEventListener('keypress', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) { // Ctrl+Shift+C
+                e.preventDefault(); // Bloquea Ctrl+Shift+C
+                window.location.href = 'https://www.futbolparaguayotv.xyz/'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        debugger; // Detiene la ejecución para depurar
+    </script>
 </body>
 </html>
