@@ -1,15 +1,381 @@
 <head>
   <script type='text/javascript' src='//strewviolently.com/55/e8/cb/55e8cb90311be645dd27b181f2cf3730.js'></script>
-<meta charset="utf-8" />
-<meta name="robots" content="noindex, nofollow" />
-<meta name="referrer" content="no-referrer" />
-<script type="text/javascript" src="//ssl.p.jwpcdn.com/player/v/8.21.1/jwplayer.js"></script>
-<script type="text/javascript">jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo"</script>
-<div id="player"></div>
-<script type='text/javascript'>
-<!-- Genero: PD
-var t="3c7363726970743e0d0a0d0a2020202076617220706c61796572496e7374616e6365203d206a77706c617965722822706c6179657222293b0d0a0d0a20202020706c61796572496e7374616e63652e7365747570287b0d0a0d0a2020202020202020706c61796c6973743a205b7b0d0a202020202020202020202020227469746c65223a2022524550524f445543544f52222c0d0a202020202020202020202022696d616765223a2022222c0d0a20202020202020202020226465736372697074696f6e223a2022454e205649564f222c0d0a20202020202020202020202022736f7572636573223a205b0d0a202020202020202020202020202020207b0d0a20202020202020202020202020202020202020202264656661756c74223a2066616c73652c20200d0a20202020202020202020202020202020202020202274797065223a202264617368222c0d0a20202020202020202020202020202020202020202266696c65223a20272268747470733a2f2f73616d2d70792d6564676530352e7469676f2e636f6d2e70792f6f75742f76312f36326465323034393561663834663930386661383936336635306334346434362f696e6465782e6d70643f636375725f73743d3026636375725f65743d3026636375725f666d745f747970653d666d7034272c0d0a20202020202020202020202020202020202020202264726d223a207b0d0a20202020202020202020202020202020202020202020202022636c6561726b6579223a207b226b65794964223a2020223439623263306537303337303432623261666639663036346530626233333131222c20226b6579223a20223833383439653330616466383534343035353032393236393331343766626637222020207d0d0a20202020202020202020202020202020202020207d2c0d0a2020202020202020202020202020202020202020226c6162656c223a202230220d0a202020202020202020202020202020207d0d0a2020202020202020202020205d0d0a20202020202020207d5d2c0d0a202020202020202077696474683a202231303025222c0d0a20202020202020206865696768743a2022353430222c0d0a2020202020202020617370656374726174696f3a202231363a39222c0d0a20202020202020206d7574653a202266616c7365222c0d0a202020202020202073747265746368696e673a20226578616374666974222c0d0a20202020202020206175746f73746172743a2066616c73652c0d0a20202020202020736b696e3a207b0d0a20202020202020202020206e616d653a20227768697465222c0d0a202020202020206163746976653a20227768697465222c0d0a20202020202020696e6163746976653a20227768697465222c0d0a202020202020206261636b67726f756e643a202223313531393138220d0a202020207d0d0a202020202020207d0d0a20202020202020293b0d0a202020202020200d0a09096a77706c617965722822706c6179657222292e6f6e2822706c6179222c2066756e6374696f6e2865297b6a77706c617965722822706c6179657222292e73657443757272656e74417564696f547261636b2830297d293b0d0a093c2f7363726970743e";for(i=0;i<t.length;i+=2){document.write(String.fromCharCode(parseInt(t.substr(i,2),16)));}
-//-->
-</script>
-</head>
-</body>
+ <div id="videoContainer">
+        <video id="videoPlayer" controls playsinline></video>
+        <iframe id="youtubePlayer" style="display:none" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+        <iframe id="kickPlayer" style="display:none" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
+        <select id="resolutionSelector">
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="540">540p</option>
+            <option value="432">432p</option>
+            <option value="360">360p</option>
+            <option value="202">202p</option>
+          
+        </select>
+        <select id="audioSelector">
+             <option value="default">Audio por defecto</option>
+        </select>
+        <button id="castButton">
+        </button>
+    </div>
+    <div id="channelList"></div>
+    <div id="channelInfo"></div>
+      <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.12.6/controls.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.12.6/shaka-player.ui.min.js"></script>
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const youtubePlayer = document.getElementById('youtubePlayer');
+        const kickPlayer = document.getElementById('kickPlayer');
+        const channelList = document.getElementById('channelList');
+        const channelInfoDiv = document.getElementById('channelInfo');
+        const resolutionSelector = document.getElementById('resolutionSelector');
+        const audioSelector = document.getElementById('audioSelector');
+        const categoryList = document.getElementById('categoryList');
+        const castButton = document.getElementById('castButton');
+        let player;
+        let currentChannelIndex = 0;
+        let lastTapTime = 0;
+        let lastClickTime = 0;
+        let hls;
+
+        const channels = [
+        {
+                name: "PARA REPRODUCIR PULSA PLAY AQUI ",
+                logo: "https://caneventsfutbpyoop01.weebly.com/uploads/1/4/8/8/148823854/mmnbvfddssrebbb_orig.png",
+                licenseKey: "49b2c0e7037042b2aff9f064e0bb3311:83849e30adf85440550292693147fbf7",
+                url: "https://sam-py-edge05.tigo.com.py/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd?ccur_st=0&ccur_et=0&ccur_fmt_type=fmp4",
+                type: "mpd",
+                category: "deportes"
+            }
+        ];
+
+        function loadChannelsFromLocalStorage() {
+            const savedChannels = localStorage.getItem('channels');
+            if (savedChannels) {
+                const parsedChannels = JSON.parse(savedChannels);
+                channels.forEach((channel, index) => {
+                    if (parsedChannels[index]) {
+                        channel.favorite = parsedChannels[index].favorite;
+                    }
+                });
+            }
+        }
+
+        function animateWhatsAppInfo() {
+            const whatsappInfo = document.getElementById('whatsappInfo');
+            const whatsappText = document.getElementById('whatsappText');
+            const whatsappNumber = document.getElementById('whatsappNumber');
+
+            whatsappInfo.style.animation = 'pulse 2s infinite';
+
+            let textContent = whatsappText.textContent;
+            whatsappText.textContent = '';
+            for (let i = 0; i < textContent.length; i++) {
+                setTimeout(() => {
+                    whatsappText.textContent += textContent[i];
+                }, i * 50);
+            }
+
+            let numberContent = whatsappNumber.textContent;
+            whatsappNumber.textContent = '';
+            for (let i = 0; i < numberContent.length; i++) {
+                setTimeout(() => {
+                    whatsappNumber.textContent += numberContent[i];
+                }, (textContent.length * 50) + (i * 50));
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadChannelsFromLocalStorage();
+            createChannelButtons();
+            animateTitle();
+            animateWhatsAppInfo();
+            document.querySelector('.category-button[data-category="all"]').classList.add('active');
+        });
+
+        function createChannelButtons(category = 'all') {
+            channelList.innerHTML = '';
+            channels.forEach((channel, index) => {
+                if (category === 'all' || channel.category === category || (category === 'favoritos' && channel.favorite)) {
+                    const button = document.createElement('button');
+                    button.className = 'channel-button';
+                    button.innerHTML = `
+                        <img class="channel-logo" src="${channel.logo}" alt="${channel.name} logo">
+                        <span class="channel-name">${channel.name}</span>
+                        <div>
+                            <button class="play-button" title="Reproducir">▶</button>
+                        </div>
+                        <i class="fas fa-star favorite-star" title="Agregar a favoritos"></i>
+                    `;
+                    button.onclick = (event) => handleChannelButtonClick(event, index);
+                    channelList.appendChild(button);
+
+                    const favoriteStar = button.querySelector('.favorite-star');
+                    favoriteStar.style.color = channel.favorite ? ' ' : ' ';
+                    favoriteStar.onclick = (event) => {
+                        event.stopPropagation();
+                        toggleFavorite(index);
+                    };
+                }
+            });
+        }
+
+        function toggleFavorite(index) {
+            channels[index].favorite = !channels[index].favorite;
+            const currentCategory = document.querySelector('.category-button.active').dataset.category;
+            createChannelButtons(currentCategory);
+            saveChannelsToLocalStorage();
+        }
+
+        function saveChannelsToLocalStorage() {
+            localStorage.setItem('channels', JSON.stringify(channels));
+        }
+
+        function loadChannelsFromLocalStorage() {
+            const savedChannels = localStorage.getItem('channels');
+            if (savedChannels) {
+                const parsedChannels = JSON.parse(savedChannels);
+                channels.forEach((channel, index) => {
+                    if (parsedChannels[index]) {
+                        channel.favorite = parsedChannels[index].favorite;
+                    }
+                });
+            }
+        }
+
+        function handleChannelButtonClick(event, index) {
+            if (event.target.classList.contains('play-button')) {
+                event.stopPropagation();
+                loadChannel(index);
+            } else if (!event.target.classList.contains('favorite-star')) {
+                const currentTime = new Date().getTime();
+                const clickLength = currentTime - lastClickTime;
+                if (clickLength < 300 && clickLength > 0) {
+                    loadChannel(index);
+                    toggleFullscreen();
+                } else {
+                    loadChannel(index);
+                }
+                lastClickTime = currentTime;
+            }
+        }
+
+        async function loadChannel(index) {
+            currentChannelIndex = index;
+            const channel = channels[index];
+            
+            if (player) {
+                await player.unload();
+                player = null;
+            }
+
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+
+            videoPlayer.style.display = 'none';
+            youtubePlayer.style.display = 'none';
+            kickPlayer.style.display = 'none';
+            resolutionSelector.style.display = 'none';
+            audioSelector.style.display = 'none';
+
+            if (channel.type === 'mpd') {
+                videoPlayer.style.display = 'block';
+                resolutionSelector.style.display = 'block';
+                audioSelector.style.display = 'block';
+                player = new shaka.Player(videoPlayer);
+
+                try {
+                    const [key, value] = channel.licenseKey.split(':');
+                    player.configure({
+                        drm: {
+                            clearKeys: {
+                                [key]: value
+                            }
+                        }
+                    });
+
+                    await player.load(channel.url);
+                    videoPlayer.play();
+
+                    updateResolutionSelector();
+                    updateAudioSelector();
+                } catch (error) {
+                    console.error('Error loading video:', error);
+                }
+            } else if (channel.type === 'm3u8') {
+                videoPlayer.style.display = 'block';
+                if (Hls.isSupported()) {
+                    hls = new Hls();
+                    hls.loadSource(channel.url);
+                    hls.attachMedia(videoPlayer);
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        videoPlayer.play();
+                        updateResolutionSelector();
+                    });
+                } else if (videoPlayer.canPlayType('application/dash+xml')) {
+                    videoPlayer.src = channel.url;
+                    videoPlayer.addEventListener('loadedmetadata', function() {
+                        videoPlayer.play();
+                    });
+                }
+            } else if (channel.type === 'youtube') {
+                youtubePlayer.style.display = 'block';
+                const videoId = channel.url.split('v=')[1];
+                youtubePlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            } else if (channel.type === 'kick') {
+                kickPlayer.style.display = 'block';
+                const channelName = channel.url.split('/').pop();
+                kickPlayer.src = `https://player.kick.com/${channelName}`;
+            }
+
+            channelInfoDiv.textContent = `Reproduciendo: ${channel.name}`;
+            channelInfoDiv.style.display = 'block';
+            setTimeout(() => {
+                channelInfoDiv.style.display = 'none';
+            }, 3000);
+
+            document.querySelectorAll('.channel-button').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === index);
+            });
+        }
+
+        function updateResolutionSelector() {
+            const tracks = player.getVariantTracks();
+            resolutionSelector.innerHTML = '';
+            const uniqueResolutions = [...new Set(tracks.map(track => track.height))];
+            uniqueResolutions.sort((a, b) => b - a);
+            uniqueResolutions.forEach(resolution => {
+                const option = document.createElement('option');
+                option.value = resolution;
+                option.text = `${resolution}p`;
+                resolutionSelector.add(option);
+            });
+        }
+
+        function updateAudioSelector() {
+            const tracks = player.getVariantTracks();
+            audioSelector.innerHTML = '';
+            const uniqueLanguages = [...new Set(tracks.map(track => track.language))];
+            uniqueLanguages.forEach(language => {
+                const option = document.createElement('option');
+                option.value = language;
+                option.text = language || 'Default';
+                audioSelector.add(option);
+            });
+        }
+
+        resolutionSelector.addEventListener('change', (event) => {
+            const height = Number(event.target.value);
+            const tracks = player.getVariantTracks();
+            const selectedTrack = tracks.find(track => track.height === height);
+            if (selectedTrack) {
+                player.selectVariantTrack(selectedTrack, true);
+            }
+        });
+
+        audioSelector.addEventListener('change', (event) => {
+            const language = event.target.value;
+            const tracks = player.getVariantTracks();
+            const selectedTrack = tracks.find(track => track.language === language);
+            if (selectedTrack) {
+                player.selectVariantTrack(selectedTrack, true);
+            }
+        });
+
+        categoryList.addEventListener('click', (event) => {
+            if (event.target.classList.contains('category-button')) {
+                const category = event.target.dataset.category;
+                createChannelButtons(category);
+                document.querySelectorAll('.category-button').forEach(btn => {
+                    btn.classList.toggle('active', btn === event.target);
+                });
+            }
+        });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                if (videoPlayer.requestFullscreen) {
+                    videoPlayer.requestFullscreen();
+                } else if (videoPlayer.mozRequestFullScreen) {
+                    videoPlayer.mozRequestFullScreen();
+                } else if (videoPlayer.webkitRequestFullscreen) {
+                    videoPlayer.webkitRequestFullscreen();
+                } else if (videoPlayer.msRequestFullscreen) {
+                    videoPlayer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        videoPlayer.addEventListener('dblclick', toggleFullscreen);
+        videoPlayer.addEventListener('touchend', (event) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            if (tapLength < 300 && tapLength > 0) {
+                toggleFullscreen();
+            }
+            lastTapTime = currentTime;
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') {
+                videoPlayer.volume = Math.min(videoPlayer.volume + 0.1, 1);
+            } else if (event.key === 'ArrowDown') {
+                videoPlayer.volume = Math.max(videoPlayer.volume - 0.1, 0);
+            } else if (event.key === 'ArrowLeft') {
+                loadChannel((currentChannelIndex - 1 + channels.length) % channels.length);
+            } else if (event.key === 'ArrowRight') {
+                loadChannel((currentChannelIndex + 1) % channels.length);
+            }
+        });
+
+        function animateTitle() {
+            const titleSpans = document.querySelectorAll('#mainTitle span');
+            titleSpans.forEach((span, index) => {
+                setTimeout(() => {
+                    span.style.opacity = '1';
+                    span.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }
+
+        castButton.addEventListener('click', () => {
+            if ('presentation' in navigator) {
+                navigator.presentation.defaultRequest = new PresentationRequest(['cast.html']);
+                navigator.presentation.defaultRequest.start()
+                    .then(connection => {
+                        connection.addEventListener('connect', () => {
+                            connection.send(JSON.stringify({
+                                action: 'loadChannel',
+                                channelInfo: channels[currentChannelIndex]
+                            }));
+                        });
+                    })
+                    .catch(error => console.error('Error starting presentation:', error));
+            } else {
+                console.log('Web Presentation API not supported');
+            }
+        });
+
+        window.addEventListener('load', () => {
+            loadChannelsFromLocalStorage();
+            createChannelButtons();
+            animateTitle();
+            document.querySelector('.category-button[data-category="all"]').classList.add('active');
+        });
+
+        shaka.polyfill.installAll();
+    </script>
