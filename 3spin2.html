@@ -1,6 +1,288 @@
-<head>
-  <script type='text/javascript' src='//strewviolently.com/55/e8/cb/55e8cb90311be645dd27b181f2cf3730.js'></script>
- <div id="videoContainer">
+<div><div id="802809071210053791" align="center" style="width: 100%; overflow-y: hidden;" class="wcustomhtml"><p style="font-family: Helvetica; font-size: large;background: blue; color: white; font-weight: bold; padding: 15px; border: 2px solid #abecf9; border-radius: 6px;">⚠ ATENCIÓN:✔SI ESTAS EN CELULAR GIRA TU PANTALLA A HORIZONTAL PARA VISUALIZAR MEJOR!,
+pulsa donde dice "PULSA PLAY AQUI para reproducir", Y Luego elige la calidad y pon en pantalla completa,este canal SOLO funciona cada vez que hay eventos o partidos en vivo!</p></div>
+
+
+
+</div>
+
+<div><div id="872294969783244015" align="inherit" style="width: 100%; overflow-y: hidden;" class="wcustomhtml"><html><head>
+    <meta charset="UTF-8">
+
+  <body style='background:#151918'></body>
+      
+    <style>
+       
+        body {
+            font-family: 'Roboto', sans-serif;
+            color:#151918;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        #mainTitle {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+        #mainTitle span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+            margin: 0 5px;
+        }
+ 
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+      
+        #videoContainer {
+            width: 100%;
+            margin: 20px auto;
+            position: relative;
+        }
+        #videoPlayer, #youtubePlayer, #kickPlayer {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            box-shadow: 0 10px 30px rgba(0, 160, 233, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        #categoryList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+          flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+        .category-button {
+            background-color: #151918 ;
+            color: #151918;
+            border: none;
+            padding: 10px 20px;
+          flex-direction: column;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .category-button:hover, .category-button:focus {
+            background-color: #151918;
+            transform: translateY(-2px);
+          flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,160,233,0.2);
+        }
+        .category-button.active {
+            background-color: #151918 ;
+          flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,160,233,0.4);
+        }
+        #channelList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            width: 100%;
+          flex-direction: column;
+          
+            max-width: 1000px;
+            margin-top: 30px;
+        }
+        .channel-button {
+            background-color: rgba(30, 30, 30, 0.8);
+            color: #fff;
+            border: none;
+            padding: 15px;
+             width: 290px;
+            height: 180px;
+            cursor: pointer;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .channel-button:hover, .channel-button:focus {
+            background-color: #151918;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,160,233,0.2);
+        }
+        .channel-button.active {
+            background-color: #151918;
+            box-shadow: 0 6px 12px rgba(0,160,233,0.4);
+        }
+        .channel-logo {
+            width: 30%;
+            height:50%;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+        .channel-name {
+            font-size: 1em;
+            color: white;
+            font-weight: 400;
+            text-align: center;
+        }
+        .play-button {
+            background-color: white;
+            border: none;
+            color: red;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            margin: 5px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .play-button:hover {
+            background-color: white;
+            transform: scale(1.1);
+        }
+        .favorite-star {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.2em;
+            color: gold ;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .favorite-star:hover {
+            transform: scale(1.2);
+        }
+        #channelInfo {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #151918 ;
+            padding: 10px 20px;
+            border-radius: 30px;
+            display: none;
+            z-index: 1000;
+            font-size: 1em;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        #resolutionSelector, #audioSelector {
+            position: absolute;
+            bottom: 50px;
+            background-color: black;
+            color: cyan;
+            border: 2px solid;
+            padding: 18px 60px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        #resolutionSelector {
+            right: 145px;
+        }
+           #audioSelector {
+            left: 10px;
+        }
+        @media (max-width: 768px) {
+            #mainTitle {
+                font-size: 2em;
+                padding: 10px 20px;
+            }
+            #videoContainer {
+                max-width: 100%;
+            }
+            #channelList {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+            .channel-button {
+                padding: 10px;
+            }
+            .channel-logo {
+                width: 50px;
+                height: 50px;
+            }
+            .channel-name {
+                font-size: 52px;
+            }
+            .category-button {
+                font-size: 0.8em;
+                padding: 8px 16px;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            #mainTitle {
+                font-size: 1.5em;
+                padding: 8px 15px;
+            }
+            #channelList {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+            }
+            .channel-logo {
+                width: 40px;
+                height: 40px;
+            }
+            .channel-name {
+                font-size: 22px ;
+            }
+            #resolutionSelector, #audioSelector {
+                padding: 3px 6px;
+                font-size: 0.8em;
+            }
+            .category-button {
+                font-size: 0.7em;
+                padding: 6px 12px;
+            }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(0, 160, 233, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(0, 160, 233, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(0, 160, 233, 0.5); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="videoContainer">
         <video id="videoPlayer" controls playsinline></video>
         <iframe id="youtubePlayer" style="display:none" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
         <iframe id="kickPlayer" style="display:none" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>
@@ -379,3 +661,61 @@
 
         shaka.polyfill.installAll();
     </script>
+</body>
+</html></div>
+
+
+
+</div>
+
+<div><div id="986264428917575946" align="left" style="width: 100%; overflow-y: hidden;" class="wcustomhtml">    <p></p>
+    
+ 
+    
+<p></p>
+<p></p>
+<br>
+    </div>
+  </div>
+    <br>
+<center><script type="text/javascript" src="https://cdn.livetrafficfeed.com/static/v5/live.js?bc=ffffff&tc=000000&brd1=2853a8&lnk=135d9e&hc=ffffff&hfc=2853a8&nc=19ff19&vv=409&tft=10&ro=0&tz=America%2FAsuncion&res=1"></script><noscript id="LTF_live_website_visitor"><a href="http://livetrafficfeed.com">Stat Counter</a></noscript></center>
+
+
+
+<script>
+        window.addEventListener('contextmenu', function (e) {
+            e.preventDefault(); // Bloquea el menú contextual (clic derecho)
+            window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta hacer clic derecho
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 123)) { // Ctrl+U, Ctrl+S, F12
+                e.preventDefault(); // Bloquea Ctrl+U, Ctrl+S, F12
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar estas combinaciones de teclas
+            }
+        });
+
+        window.addEventListener('keyup', function (e) {
+            if (e.keyCode === 123) { // F12 (suelta la tecla)
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar F12
+            }
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 73) { // Ctrl+Shift+I
+                e.preventDefault(); // Bloquea Ctrl+Shift+I
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        window.addEventListener('keypress', function (e) {
+            if (e.ctrlKey && e.shiftKey && e.keyCode === 67) { // Ctrl+Shift+C
+                e.preventDefault(); // Bloquea Ctrl+Shift+C
+                window.location.href = 'https://sites.google.com/view/cableparatodos/inicio'; // Redirige a tu web principal si alguien intenta usar esta combinación de teclas
+            }
+        });
+
+        debugger; // Detiene la ejecución para depurar
+    </script>
+
+  </body>
