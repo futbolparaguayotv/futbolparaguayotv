@@ -1,0 +1,6 @@
+#EXTM3U
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-STREAM-INF:BANDWIDTH=487972,AVERAGE-BANDWIDTH=464736,CODECS="mp4a.40.2,avc1.42C015",RESOLUTION=480x270,AUDIO="sam-py-edge02.tigo.com.py-multi-audio",FRAME-RATE=25.000
+https://sam-py-edge02.tigo.com.py/ccur-session/01_1680281740/VMX4/rolling-buffer/TigoSportsHD/TigoSportsHD/transmux/TigoSportsHD8-1/CCURStream_video_TigoSportsHD8-1.m3u8?ccur_st=0&ccur_et=0&ccur_fmt_type=ts
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=1800000,CODECS="avc1.64001F",RESOLUTION=1280x720,URI="https://sam-py-edge02.tigo.com.py/ccur-session/01_1680281740/VMX4/rolling-buffer/TigoSportsHD/TigoSportsHD/transmux/TigoSportsHD8-1/CCURStream_video_TigoSportsHD4-CCUR_iframe.m3u8?ccur_st=0&ccur_et=0&ccur_fmt_type=ts&ccur_ifreq=1"
+#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="sam-py-edge02.tigo.com.py-multi-audio",LANGUAGE="spa",NAME="spa-Stereo (aac)",CHANNELS="2",AUTOSELECT=YES,DEFAULT=YES,URI="https://sam-py-edge02.tigo.com.py/ccur-session/01_1680281740/VMX4/rolling-buffer/TigoSportsHD/TigoSportsHD/transmux/TigoSportsHD8-1/CCURStream_audio_TigoSportsHD1-10.m3u8?ccur_st=0&ccur_et=0&ccur_fmt_type=ts"
