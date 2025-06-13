@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPTV Estilo Vix</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #060f1d;
+      color: white;
+    }
+
+    header {
+      background: #202536;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    #playerContainer {
+      background: #000;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #player {
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 16 / 9;
+    }
+
+    #playerInfoBox {
+      background-color: #202536;
+      max-width: 800px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-radius: 0 0 8px 8px;
+      box-sizing: border-box;
+    }
+
+    #playerInfoBox div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #playerLogo {
+      height: 30px;
+    }
+
+    #playerTitle {
+      font-size: 1rem;
+    }
+
+    .liveBadge {
+      background-color: red;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+
+    #channelList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .channel {
+      background: #202536;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem;
+    }
+
+    .channel:hover {
+      background: #2e3345;
+    }
+
+    .channel img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .channel span {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      #channelList {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #playerInfoBox {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .liveBadge {
+        align-self: flex-start;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #channelList {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .jw-settings-sharing, .jw-icon-pip, .jw-rightclick {
+      display: none !important;
+    }
+  </style>
+  <script src="https://content.jwplatform.com/libraries/KB5zFt7A.js"></script>
+  <script>
+    jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
+  </script>
+</head>
+<body>
+
+<header>
+  <h2>TV En Vivo</h2>
+</header>
+
+<div id="playerContainer">
+  <div id="player"></div>
+  <div id="playerInfoBox">
+    <div>
+      <img id="playerLogo" src="" alt="">
+      <strong id="playerTitle">Selecciona un canal</strong>
+    </div>
+    <span class="liveBadge">EN VIVO</span>
+  </div>
+</div>
+
+<div id="channelList"></div>
+
+<script>
+  const m3u8Url = "https://raw.githubusercontent.com/test22222222bdfgwcAdx/update/refs/heads/main/bb.m3u";
+  const channels = [];
+
+  fetch(m3u8Url)
+    .then(res => res.text())
+    .then(parseM3U);
+
+  function parseM3U(data) {
+    const lines = data.split('\n').map(l => l.trim()).filter(l => l !== '');
+    let current = {};
+    lines.forEach(line => {
+      if (line.startsWith('#EXTINF')) {
+        const name = line.match(/,(.*)/)?.[1] || 'Sin nombre';
+        const logo = line.match(/tvg-logo="([^"]+)"/)?.[1] || '';
+        const group = line.match(/group-title="([^"]+)"/)?.[1] || '';
+        current = { name, logo, group, drm: {} };
+      } else if (line.startsWith('#KODIPROP:')) {
+        if (line.includes('license_type=')) {
+          const type = line.split('=')[1].trim();
+          current.drm.type = type;
+        }
+        if (line.includes('license_key=')) {
+          const keyData = line.split('=')[1].trim();
+          if (current.drm.type === 'clearkey') {
+            const [keyId, key] = keyData.split(':');
+            current.drm.details = { keyId, key };
+          } else if (current.drm.type === 'com.widevine.alpha') {
+            current.drm.details = { url: keyData };
+          }
+        }
+      } else if (!line.startsWith('#')) {
+        current.url = line.split('|')[0];
+        channels.push({...current});
+      }
+    });
+
+    renderChannels();
+  }
+
+  function renderChannels() {
+    const container = document.getElementById('channelList');
+    channels.forEach(channel => {
+      const div = document.createElement('div');
+      div.className = 'channel';
+      div.innerHTML = `
+        <img src="${channel.logo}" />
+        <span>${channel.name}</span>
+      `;
+      div.onclick = () => playChannel(channel);
+      container.appendChild(div);
+    });
+  }
+
+  function playChannel(channel) {
+    const url = channel.url;
+    let type = '';
+
+    if (url.endsWith('.mpd')) type = 'dash';
+    else if (url.endsWith('.m3u8')) type = 'hls';
+    else {
+      alert("Formato no soportado: " + url);
+      return;
+    }
+
+    // Scroll hacia arriba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    document.getElementById('playerTitle').textContent = channel.name;
+    document.getElementById('playerLogo').src = channel.logo;
+
+    // Destruir y reconstruir reproductor
+    jwplayer("player").remove();
+    const playerDiv = document.getElementById("player");
+    const newDiv = document.createElement("div");
+    newDiv.id = "player";
+    playerDiv.replaceWith(newDiv);
+
+    // DRM
+    const drmConfig = {};
+    if (channel.drm?.type === 'clearkey') {
+      drmConfig.clearkey = {
+        keyId: channel.drm.details.keyId,
+        key: channel.drm.details.key
+      };
+    } else if (channel.drm?.type === 'com.widevine.alpha') {
+      drmConfig.widevine = {
+        url: channel.drm.details.url
+      };
+    }
+
+    jwplayer("player").setup({
+      playlist: [{
+        title: channel.name,
+        image: channel.logo,
+        sources: [{
+          file: url,
+          type: type,
+          drm: Object.keys(drmConfig).length ? drmConfig : undefined
+        }]
+      }],
+      width: "100%",
+      aspectratio: "16:9",
+      autostart: true,
+      cast: {},
+      sharing: {}
+    });
+  }
+</script>
+
+</body>
+</html>
