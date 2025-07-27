@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reproductor Tigo Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Shaka Player y Controles -->
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.14.10/dist/shaka-player.ui.min.js" defer></script>
+  <link href="https://cdn.jsdelivr.net/npm/shaka-player@4.14.10/dist/controls.min.css" rel="stylesheet">
+
+  <!-- Iconos de Material para botones -->
+  <link href="https://fonts.googleapis.com/css?family=Material+Icons+Sharp" rel="stylesheet">
+
+  <style>
+    html, body {
+      margin: 0;
+      background-color: #000;
+      height: 100%;
+    }
+    #video-container {
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      position: relative;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+    }
+    .shaka-controls-container {
+      font-family: 'Roboto', sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="video-container" class="shaka-player-container">
+    <video autoplay muted data-shaka-player id="video" poster="https://via.placeholder.com/1280x720.png?text=Cargando..."></video>
+  </div>
+
+  <script>
+    document.addEventListener('shaka-ui-loaded', async () => {
+      const video = document.getElementById('video');
+      const ui = video['ui'];
+      const controls = ui.getControls();
+      const player = controls.getPlayer();
+
+      player.configure({
+        drm: {
+          clearKeys: {
+            // Aquí ponés tus claves ClearKey si tu .mpd las necesita
+            "1c62a216a5fe423f959cb1ca02f62d83": "54f2fdc83c1da33cd9269bf21e08218c"
+          }
+        }
+      });
+
+      try {
+        await player.load('https://d3kzwqwnq1f7tq.cloudfront.net/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd');
+        console.log('🎉 Reproducción iniciada');
+      } catch (error) {
+        console.error('Error al cargar el video:', error);
+      }
+    });
+
+    document.addEventListener('shaka-ui-load-failed', () => {
+      console.error('❌ No se pudo cargar la interfaz de Shaka');
+    });
+  </script>
+</body>
+</html>
