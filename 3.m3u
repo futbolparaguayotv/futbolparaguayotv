@@ -1,0 +1,75 @@
+#EXTM3U
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier clubes
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=d98239180d8380b3a1bb28d875b1ddf2&key=cf836ced579257d1c76ae8809818e6c4
+https://02.xn--u9j5h1bzc8106c.com/hls/Vk8rYzg1WGtMTDh1YlU0Myt6Z2s3UW1qemVjNUh5L09aQWREc096TzFGQmRLUlVGRE5zVTVVNGhPRzNzSEhFWGpQT3FraTM2aVNxTlFUcUREMzdmOUVkMXpUaExIZzBIcm90NDgyc1c1TlYzNWFZM3ZIaXpWUFV6QTVqYjBldmIvaGhJTWxxZXptTnNIRlYrb0l5MVBRPT0,/N3FtZmJjR1dmbjkvdVJGZHNuWUZFb1FYNVVxS2lLRWcybjNQNzRjOVhWcEpJWHFGazdmV2d1L0RVeTRIZzNjTzI0QkJKMXdyZHk4RVhxUktjQklEQk41U203SlJ6dnNPK2RRK00vYnFCVUU9/pre1/tracks-v1a1/m3u8_gx_mono.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",PREMIER CLUBES OPC 2
+#EXTVLCOPT:http-referer=https://embedcanaistv.com/
+#EXTVLCOPT:http-origin=https://embedcanaistv.com
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://embmaxtv.online/premiereclubes/index.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 2
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=fd2e8019f37211ca8b78a8b656f1b83a&key=273189c214e85b43ac36298d1c422330
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/pgub1bh7o9/out/v1/7a59226197644bfaa2b00f488bd95288/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 3
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=9547f9aead1237c8a3b1bf0a91ed9995&key=534fab4541fef31921dd970c65d51848
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/8ci7l7dt0d/out/v1/98fe69f2cdc041388004305e63353268/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 4
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=ce5d18ffd68650affce1985201983ab7&key=397c64e42507d95e5460830918c22a98
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/zytzybatcd/out/v1/4e59aa00f6784bb98170741d40b33e3e/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 5
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=d5a3ac0b892bfccdf352b6def9cb2764&key=ac0936acc0036fad2273efaa42b1fafd
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/j4y12ucrx0/out/v1/9135597c4400465e9e752dc32de587fd/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 6
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=05cedc366ce4ec735ee4b33fcefbf01f&key=475d6dd40eaba6896e02b26a6cf34d95
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/cydwktwhqj/out/v1/c6e2919fe4e04a73935691f8284a4afe/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 7
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=7ce96e01eee54fb77e5cc4e7b753d6b0&key=184f94303d3357b9a7381ccdeee9b611
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/wczqphrl5k/out/v1/7a20b4be236a4a9484fdf5cdfcbe79d5/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",Premier 8
+#EXTVLCOPT:drc-license-uri=https://vercel-php-clearkey-hex-base64-json.vercel.app/api/results.php?keyid=7ba384f9d983c731ab1e3702c16e2faf&key=f28adca4375e8a041fd22aef26440009
+https://ottb.live.cf.ww.aiv-cdn.net/iad-nitro/live/clients/dash/enc/dabubydklo/out/v1/c272f10312ac4e81bcf2183509703dd1/cenc.mpd
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 1
+#EXTVLCOPT:http-referer=https://embedtv-2.icu/
+#EXTVLCOPT:http-origin=https://embedtv-2.icu
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://01.xn--u9j5h1bzc8106c.com/hls/cndoT2IvaG5QL1NHVkNPMDFlc2ZGTSsweDhLcllnVlViVWt6SGN2cC9vNUlrZERwdU1JSUZnaXQveWgvVW9pTnkrdC84L3JaM2hYS2hTRW9nSEJlY2UzRXc3c0Fmcmp5KzM1NnJYaEk1djJmVytnb1l2eVd5eXBFejJoNWR3SXFtSi84UGo4ZW41TzhHZUxjRDZLSGNRPT0,/Rko3VWRCK0RlZVJOdExCMU56WGJjcis2RkRnVUN4eW1rRXZablBxdVQ2MzFsMDVIaHl5Sml1S0Jaenhjb2ZhZzUycFZKbis4VUV2WXdSNndPcEdlQ1dLdXlCcWE1ZUhDT0lzNCtzWGpBaHM9/sportv/tracks-v1a1/m3u8_gx_mono.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 2
+#EXTVLCOPT:http-referer=https://embedtv-2.icu/
+#EXTVLCOPT:http-origin=https://embedtv-2.icu
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://01.xn--u9j5h1bzc8106c.com/hls/ZmgxN3Z1akRmRzQ5WEN4Z3JNNCtXdk8vUUF6TjN0SEhJazQ4WFcrWTFCbHBJbUpqZWVwU3VNKzlJbm03Nko5MnhXVUUxdVFjYXhGOHlGV3VZYy9GZmc9PQ,,/master.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 3
+#EXTVLCOPT:http-referer=https://embedtv-2.icu/
+#EXTVLCOPT:http-origin=https://embedtv-2.icu
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://01.xn--u9j5h1bzc8106c.com/hls/M09XZEh2alc5a0U3WWZDU0I0aEFjM2tpMW53WkxVQjF3V2hYSUx2RlZQaWx4LzNIS2dkWnVKak1MVDlCUm41cTZCOXJxSkJSN3ExL2hQTm4va1BVaHF5a1lJa091dW9OZjFiWFNmZncrOVFOSlZtOFVDTDhJNU4vN3dFNERxeDRYajBOUGZxVU1IMGpNQzVmT01RcE1RPT0,/Rko3VWRCK0RlZVJOdExCMU56WGJjcis2RkRnVUN4eW1rRXZablBxdVQ2MzFsMDVIaHl5Sml1S0Jaenhjb2ZhZzUycFZKbis4VUV2WXdSNndPcEdlQ1dLdXlCcWE1ZUhDT0lzNCtzWGpBaHM9/sportv3/tracks-v1a1/m3u8_gx_mono.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 1 OPC 2
+#EXTVLCOPT:http-referer=https://embedcanaistv.com/
+#EXTVLCOPT:http-origin=https://embedcanaistv.com
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://embmaxtv.online/sportv/tracks-v1a1/mono.ts.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 2 OPC 2
+#EXTVLCOPT:http-referer=https://embedcanaistv.com/
+#EXTVLCOPT:http-origin=https://embedcanaistv.com
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://embmaxtv.online/sportv2/tracks-v1a1/mono.ts.m3u8
+
+#EXTINF:-1 group-title="⚽ DEPORTES BRASIL",SPORTV 3 OPC 2
+#EXTVLCOPT:http-referer=https://embedcanaistv.com/
+#EXTVLCOPT:http-origin=https://embedcanaistv.com
+#EXTVLCOPT:http-user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36
+https://embmaxtv.online/sportv3/tracks-v1a1/mono.ts.m3u8
