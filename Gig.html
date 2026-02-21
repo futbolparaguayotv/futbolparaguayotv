@@ -1,63 +1,255 @@
-<div class="player-container" id="playerContainer">
-  <iframe
-    src="https://aux.canalesonline24.workers.dev/gigared?id=TV_Publica/sa_live_dash/TV_Publica.mpd"
-    allow="encrypted-media; fullscreen"
-    allowfullscreen
-    scrolling="no">
-  </iframe>
-</div>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* Contenedor normal de la web */
-.player-container {
-  position: relative;      /* dentro del flujo normal */
-  width: 100%;
-  max-width: 100%;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-  margin: 20px auto;
-  background: #000;
-  transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease;
-  z-index: 1;
+#flow-player{
+  max-width:1000px;
+  margin:auto;
+  position:relative;
+  background:#000;
+  border-radius:10px;
+  overflow:hidden;
+  font-family:Arial, sans-serif;
 }
 
-/* Contenedor “simula rotación” visual del iframe */
-.player-container.rotated {
-  transform: rotate(90deg);   /* solo gira el rectángulo del iframe */
-  transform-origin: center center;
+#flow-player video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+  display:block;
 }
 
-/* Iframe normal dentro del contenedor */
-.player-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  display: block;
+#flow-player .controls{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px;
+  background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+  transition:opacity .25s;
+}
+
+#flow-player input[type=range]{
+  flex:1;
+  -webkit-appearance:none;
+  appearance:none;
+  height:6px;
+  border-radius:3px;
+  background:#fff;
+}
+#flow-player input[type=range]::-webkit-slider-thumb{width:0;height:0;}
+#flow-player input[type=range]::-moz-range-thumb{width:0;height:0;border:0;}
+
+#flow-player button{
+  background:none;
+  border:0;
+  cursor:pointer;
+  width:34px;
+}
+
+#fp_fs{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:5;
+  transition:opacity .25s;
+}
+
+#fp_qmenu{
+  position:absolute;
+  bottom:60px;
+  right:10px;
+  background:#111;
+  color:#fff;
+  border-radius:6px;
+  display:none;
+  font-size:13px;
+  z-index:6;
+}
+#fp_qmenu div{padding:6px 10px;cursor:pointer;}
+#fp_qmenu div:hover{background:#222;}
+
+#flow-player.ios-landscape{
+  transform:rotate(90deg);
+  transform-origin:center;
+  width:100vh!important;
+  height:100vw!important;
+  position:fixed!important;
+  top:0; left:0;
+  z-index:9999;
+}
+
+#flow-player.hide-ui .controls,
+#flow-player.hide-ui #fp_fs{
+  opacity:0;
+  pointer-events:none;
 }
 </style>
+</head>
+
+<body>
+
+<div id="flow-player">
+
+  <video id="fp_video" playsinline autoplay></video>
+
+  <button id="fp_fs">
+    <svg viewBox="0 0 24 24" width="26" height="26"
+      stroke="#14abd1" stroke-width="3" fill="none">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+    </svg>
+  </button>
+
+  <div class="controls">
+    <button id="fp_play">
+      <svg id="fp_icoPlay" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="fp_icoPause" viewBox="0 0 24 24" fill="#fff" style="display:none"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+    </button>
+
+    <input id="fp_bar" type="range" value="0" min="0" step="0.1">
+
+    <button id="fp_mute">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M3 10v4h4l5 5V5L7 10z"/></svg>
+    </button>
+
+    <button id="fp_gear">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="#14abd1">
+        <path d="M19.4 13.5c.04-.5.06-1 .06-1.5s-.02-1-.06-1.5l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-2.6-1.5l-.38-2.65A.5.5 0 0 0 13.1 1h-4a.5.5 0 0 0-.5.42l-.38 2.65a7.03 7.03 0 0 0-2.6 1.5l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L2.6 10.5c-.04.5-.06 1-.06 1.5s.02 1 .06 1.5L.49 15.15a.5.5 0 0 0-.12.64l2 3.46c.14.24.43.34.69.22l2.49-1a7.03 7.03 0 0 0 2.6 1.5l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65a7.03 7.03 0 0 0 2.6-1.5l2.49 1c.26.12.55.02.69-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13.5zM11 15.5A3.5 3.5 0 1 1 11 8a3.5 3.5 0 0 1 0 7.5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="fp_qmenu"></div>
+</div>
+
+<!-- Shaka Player -->
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.compiled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.ui.js"></script>
 
 <script>
-const container = document.getElementById('playerContainer');
+const video = document.getElementById("fp_video");
+const bar = document.getElementById("fp_bar");
+const play = document.getElementById("fp_play");
+const icoPlay = document.getElementById("fp_icoPlay");
+const icoPause = document.getElementById("fp_icoPause");
+const mute = document.getElementById("fp_mute");
+const fs = document.getElementById("fp_fs");
+const gear = document.getElementById("fp_gear");
+const qmenu = document.getElementById("fp_qmenu");
+const box = document.getElementById("flow-player");
 
-/* Detecta orientación y aplica clase */
-function handleOrientation() {
-  if (window.innerWidth > window.innerHeight) {
-    container.classList.add('rotated');
-  } else {
-    container.classList.remove('rotated');
+video.muted=false;
+
+/* ===== Shaka Player en nuestro reproductor ===== */
+const manifestUri = "https://cdn03.gigared.com.ar/live/eds/ESPN/sa_live_dash/ESPN.mpd";
+
+/* ClearKey ejemplo (HEX) */
+const CLEAR_KEYS = {
+  "8b55a3ba068f882f49b36d216f29506f": "77f418bbcfc73739ebca9c52321472d3"
+};
+
+async function initShaka() {
+  shaka.polyfill.installAll();
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error("Shaka Player no soportado");
+    return;
   }
+
+  const player = new shaka.Player(video);
+
+  player.configure({
+    drm: { clearKeys: CLEAR_KEYS },
+    abr: { enabled: false },
+    preferredAudioLanguage: "es",
+    preferredTextLanguage: "es"
+  });
+
+  player.addEventListener("error", e => console.error("Shaka error:", e.detail));
+
+  try {
+    await player.load(manifestUri);
+    console.log("MPD cargado con éxito");
+  } catch (e) {
+    console.error("Error cargando MPD:", e);
+  }
+
+  // Menú calidad Shaka
+  const tracks = player.getVariantTracks();
+  qmenu.innerHTML="";
+  const auto = document.createElement("div");
+  auto.textContent="Auto";
+  auto.onclick = () => { player.configure({abr:{enabled:true}}); qmenu.style.display="none"; };
+  qmenu.appendChild(auto);
+  tracks.filter(t=>t.height)
+        .sort((a,b)=>b.height-a.height)
+        .forEach(t=>{
+          const d = document.createElement("div");
+          d.textContent = t.height+"p";
+          d.onclick = ()=>{
+            player.configure({abr:{enabled:false}});
+            player.selectVariantTrack(t,true);
+            qmenu.style.display="none";
+          };
+          qmenu.appendChild(d);
+        });
 }
 
-window.addEventListener('resize', handleOrientation);
-window.addEventListener('orientationchange', handleOrientation);
-handleOrientation();
+initShaka();
 
-/* Fullscreen al doble click del contenedor */
-container.addEventListener('dblclick', () => {
-  if (!document.fullscreenElement) {
-    container.requestFullscreen();
-  } else {
-    document.exitFullscreen();
+/* ===== TUS CONTROLES — NO TOCADOS ===== */
+play.onclick=()=> video.paused?video.play():video.pause();
+video.onplay=()=>{icoPlay.style.display="none"; icoPause.style.display="block"; showUI();};
+video.onpause=()=>{icoPlay.style.display="block"; icoPause.style.display="none"; box.classList.remove("hide-ui");};
+
+video.ontimeupdate=()=>{bar.max=video.duration||0; bar.value=video.currentTime;};
+bar.oninput=()=> video.currentTime=bar.value;
+
+mute.onclick=()=> video.muted=!video.muted;
+
+function toggleFS(){if(!document.fullscreenElement) box.requestFullscreen();else document.exitFullscreen();}
+fs.onclick=toggleFS;
+
+video.ondblclick=toggleFS;
+let lastTap=0;
+video.ontouchend=()=>{
+  const now=Date.now();
+  if(now-lastTap<300) toggleFS();
+  lastTap=now;
+};
+
+gear.onclick=()=>{qmenu.style.display = qmenu.style.display==="block"?"none":"block";};
+
+/* landscape */
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
+document.addEventListener("fullscreenchange", async()=>{
+  if(document.fullscreenElement){
+    if(!isIOS && screen.orientation?.lock){ try{await screen.orientation.lock("landscape")}catch(e){} }
+    if(isIOS) box.classList.add("ios-landscape");
+  }else{
+    if(!isIOS && screen.orientation?.unlock){ try{screen.orientation.unlock()}catch(e){} }
+    box.classList.remove("ios-landscape");
   }
 });
+
+/* auto hide */
+let uiTimer;
+function showUI(){
+  box.classList.remove("hide-ui");
+  clearTimeout(uiTimer);
+  if(!video.paused){
+    uiTimer=setTimeout(()=>{box.classList.add("hide-ui");},2500);
+  }
+}
+box.addEventListener("mousemove",showUI);
+box.addEventListener("touchstart",showUI);
+box.addEventListener("click",showUI);
 </script>
+
+</body>
+</html>
