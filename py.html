@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+/* Ajustes mínimos para evitar scroll/descargas visuales sin tocar el resto */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Evita que el player provoque scroll si algo dentro cambia de tamaño */
+#flow-player{
+  max-width:1000px;
+  margin:auto;
+  position:relative;
+  background:#000;
+  border-radius:10px;
+  overflow:hidden;
+  font-family:Arial, sans-serif;
+}
+
+#flow-player video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+  display:block;
+}
+
+#flow-player .controls{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 14px;
+  background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+  transition:opacity .25s;
+}
+
+#flow-player input[type=range]{
+  flex:1;
+  -webkit-appearance:none;
+  appearance:none;
+  height:6px;
+  border-radius:3px;
+  background:#fff;
+}
+#flow-player input[type=range]::-webkit-slider-thumb{width:0;height:0;}
+#flow-player input[type=range]::-moz-range-thumb{width:0;height:0;border:0;}
+
+#flow-player button{
+  background:none;
+  border:0;
+  cursor:pointer;
+  width:34px;
+}
+
+#fp_fs{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:5;
+  transition:opacity .25s;
+}
+
+#fp_qmenu{
+  position:absolute;
+  bottom:60px;
+  right:10px;
+  background:#111;
+  color:#fff;
+  border-radius:6px;
+  display:none;
+  font-size:13px;
+  z-index:6;
+}
+#fp_qmenu div{padding:6px 10px;cursor:pointer;}
+#fp_qmenu div:hover{background:#222;}
+
+/* Forzar overlays a posición absoluta para que no empujen el layout */
+#fp_qmenu, .shaka-error, .shaka-overflow {
+  position: absolute;
+  z-index: 9999;
+  right: 10px;
+  bottom: 60px;
+}
+
+#flow-player.ios-landscape{
+  transform:rotate(90deg);
+  transform-origin:center;
+  width:100vh!important;
+  height:100vw!important;
+  position:fixed!important;
+  top:0; left:0;
+  z-index:9999;
+}
+
+#flow-player.hide-ui .controls,
+#flow-player.hide-ui #fp_fs{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Panel de detección de MPD: permanece en el DOM pero oculto al público */
+#fp_mpd_panel{
+  position:absolute;
+  left:10px;
+  top:10px;
+  background:rgba(0,0,0,0.6);
+  color:#fff;
+  padding:8px 10px;
+  border-radius:6px;
+  font-size:12px;
+  z-index:9998;
+  max-width:45%;
+  max-height:40%;
+  overflow:auto;
+  display:none; /* oculto por defecto */
+}
+#fp_mpd_panel h4{margin:0 0 6px 0;font-size:13px;}
+#fp_mpd_panel div.item{padding:4px 6px;border-radius:4px;background:rgba(255,255,255,0.03);margin-bottom:6px;word-break:break-all;}
+#fp_mpd_panel button.toggle{background:#14abd1;border:0;color:#fff;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:12px;}
+</style>
+</head>
+
+<body>
+
+<div id="flow-player">
+
+  <video id="fp_video" playsinline autoplay></video>
+
+  <button id="fp_fs" aria-label="Fullscreen">
+    <svg viewBox="0 0 24 24" width="26" height="26"
+      stroke="#14abd1" stroke-width="3" fill="none">
+      <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+    </svg>
+  </button>
+
+  <div class="controls" role="group" aria-label="Controles">
+    <button id="fp_play" aria-label="Play/Pause">
+      <svg id="fp_icoPlay" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="fp_icoPause" viewBox="0 0 24 24" fill="#fff" style="display:none"><path d="M6 19h4V5H6zm8-14v14h4V5z"/></svg>
+    </button>
+
+    <input id="fp_bar" type="range" value="0" min="0" step="0.1" aria-label="Barra de progreso">
+
+    <button id="fp_mute" aria-label="Mute/Unmute">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M3 10v4h4l5 5V5L7 10z"/></svg>
+    </button>
+
+    <button id="fp_gear" aria-label="Opciones">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="#14abd1">
+        <path d="M19.4 13.5c.04-.5.06-1 .06-1.5s-.02-1-.06-1.5l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-2.6-1.5l-.38-2.65A.5.5 0 0 0 13.1 1h-4a.5.5 0 0 0-.5.42l-.38 2.65a7.03 7.03 0 0 0-2.6 1.5l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64L2.6 10.5c-.04.5-.06 1-.06 1.5s.02 1 .06 1.5L.49 15.15a.5.5 0 0 0-.12.64l2 3.46c.14.24.43.34.69.22l2.49-1a7.03 7.03 0 0 0 2.6 1.5l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65a7.03 7.03 0 0 0 2.6-1.5l2.49 1c.26.12.55.02.69-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13.5zM11 15.5A3.5 3.5 0 1 1 11 8a3.5 3.5 0 0 1 0 7.5z"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="fp_qmenu" aria-hidden="true"></div>
+
+  <!-- Panel de MPD: permanece en el DOM pero oculto al público.
+       Para desarrolladores: se puede mostrar con Ctrl+Shift+M -->
+  <div id="fp_mpd_panel" aria-hidden="true">
+    <h4>MPD detectados</h4>
+    <div id="fp_mpd_list"></div>
+    <button class="toggle" id="fp_mpd_toggle">Mostrar/Ocultar</button>
+  </div>
+</div>
+
+<!-- Shaka Player -->
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.compiled.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.ui.js"></script>
+
+<script>
+const video = document.getElementById("fp_video");
+const bar = document.getElementById("fp_bar");
+const play = document.getElementById("fp_play");
+const icoPlay = document.getElementById("fp_icoPlay");
+const icoPause = document.getElementById("fp_icoPause");
+const mute = document.getElementById("fp_mute");
+const fs = document.getElementById("fp_fs");
+const gear = document.getElementById("fp_gear");
+const qmenu = document.getElementById("fp_qmenu");
+const box = document.getElementById("flow-player");
+
+video.muted=false;
+
+/* ===== Shaka Player en nuestro reproductor ===== */
+const manifestUri = "https://cors-proxy.cooks.fyi/https://cdnlb.gigared.com.ar/live/eds/Canal_Local_Gigared_Santa_Fe/sa_live_dash/Canal_Local_Gigared_Santa_Fe.mpd";
+
+/* ClearKey ejemplo (HEX) */
+const CLEAR_KEYS = {
+  "c48d578949a3d595c87232a17430e375": "6ef34a3ae28d31ddb9e3741fe15e36f8"
+};
+
+async function initShaka() {
+  shaka.polyfill.installAll();
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error("Shaka Player no soportado");
+    return;
+  }
+
+  const player = new shaka.Player(video);
+
+  // Exponer referencia global para hooks externos
+  window.shakaPlayer = player;
+
+  player.configure({
+    drm: { clearKeys: CLEAR_KEYS },
+    abr: { enabled: false },
+    preferredAudioLanguage: "es",
+    preferredTextLanguage: "es"
+  });
+
+  player.addEventListener("error", e => console.error("Shaka error:", e.detail));
+
+  try {
+    await player.load(manifestUri);
+    console.log("MPD cargado con éxito");
+  } catch (e) {
+    console.error("Error cargando MPD:", e);
+  }
+
+  // Menú calidad: priorizar audio en español y deduplicar por resolución
+  const tracks = player.getVariantTracks();
+
+  const byHeight = new Map();
+
+  tracks.filter(t => t.height).forEach(t => {
+    const key = t.height;
+    const existing = byHeight.get(key);
+
+    const isEs = (t.audioLanguage === "es" || t.language === "es");
+    const existingIsEs = existing && (existing.audioLanguage === "es" || existing.language === "es");
+
+    if (!existing) {
+      byHeight.set(key, t);
+      return;
+    }
+
+    if (isEs && !existingIsEs) {
+      byHeight.set(key, t);
+      return;
+    }
+
+    if (isEs === existingIsEs) {
+      if ((t.bandwidth || 0) > (existing.bandwidth || 0)) {
+        byHeight.set(key, t);
+      }
+    }
+  });
+
+  qmenu.innerHTML = "";
+  const auto = document.createElement("div");
+  auto.textContent = "Auto";
+  auto.onclick = () => { player.configure({ abr: { enabled: true } }); qmenu.style.display = "none"; };
+  qmenu.appendChild(auto);
+
+  [...byHeight.values()]
+    .sort((a, b) => b.height - a.height)
+    .forEach(t => {
+      const d = document.createElement("div");
+      d.textContent = `${t.height}p`;
+      d.onclick = () => {
+        player.configure({ abr: { enabled: false } });
+        player.selectVariantTrack(t, true);
+        qmenu.style.display = "none";
+      };
+      qmenu.appendChild(d);
+    });
+
+  (function selectBestOnLoad() {
+    const allVideoTracks = tracks.filter(t => t.height);
+    const esTracks = allVideoTracks.filter(t => t.audioLanguage === "es" || t.language === "es");
+
+    function bestByHeight(arr) {
+      const map = new Map();
+      arr.forEach(t => {
+        const key = t.height;
+        const prev = map.get(key);
+        if (!prev || (t.bandwidth || 0) > (prev.bandwidth || 0)) map.set(key, t);
+      });
+      return [...map.values()].sort((a,b)=>b.height-a.height)[0] || null;
+    }
+
+    const bestEs = bestByHeight(esTracks);
+    const bestAny = bestByHeight(allVideoTracks);
+    const best = bestEs || bestAny;
+
+    if (best) {
+      try {
+        player.configure({ abr: { enabled: false } });
+        player.selectVariantTrack(best, true);
+        console.log("Seleccionada variante automática:", best);
+      } catch (e) {
+        console.warn("No se pudo seleccionar la variante automática:", e);
+      }
+    }
+  })();
+}
+
+initShaka();
+
+/* ===== Controles básicos ===== */
+play.onclick=()=> video.paused?video.play():video.pause();
+video.onplay=()=>{icoPlay.style.display="none"; icoPause.style.display="block"; showUI();};
+video.onpause=()=>{icoPlay.style.display="block"; icoPause.style.display="none"; box.classList.remove("hide-ui");};
+
+video.ontimeupdate=()=>{bar.max=video.duration||0; bar.value=video.currentTime;};
+bar.oninput=()=> video.currentTime=bar.value;
+
+mute.onclick=()=> video.muted=!video.muted;
+
+function toggleFS(){if(!document.fullscreenElement) box.requestFullscreen();else document.exitFullscreen();}
+fs.onclick=toggleFS;
+
+video.ondblclick=toggleFS;
+let lastTap=0;
+video.ontouchend=()=>{
+  const now=Date.now();
+  if(now-lastTap<300) toggleFS();
+  lastTap=now;
+};
+
+gear.onclick=()=>{qmenu.style.display = qmenu.style.display==="block"?"none":"block";};
+
+/* landscape */
+const isIOS=/iPhone|iPad|iPod/.test(navigator.userAgent);
+document.addEventListener("fullscreenchange", async()=>{
+  if(document.fullscreenElement){
+    if(!isIOS && screen.orientation?.lock){ try{await screen.orientation.lock("landscape")}catch(e){} }
+    if(isIOS) box.classList.add("ios-landscape");
+  }else{
+    if(!isIOS && screen.orientation?.unlock){ try{screen.orientation.unlock()}catch(e){} }
+    box.classList.remove("ios-landscape");
+  }
+});
+
+/* auto hide */
+let uiTimer;
+function showUI(){
+  box.classList.remove("hide-ui");
+  clearTimeout(uiTimer);
+  if(!video.paused){
+    uiTimer=setTimeout(()=>{box.classList.add("hide-ui");},2500);
+  }
+}
+box.addEventListener("mousemove",showUI);
+box.addEventListener("touchstart",showUI);
+box.addEventListener("click",showUI);
+</script>
+
+<!-- Script añadido: detección automática de MPD + AUTO-SWITCH para TODOS los dominios -->
+<script>
+(function(){
+  // CONFIGURACIÓN: ahora permite TODOS los dominios por defecto
+  const AUTO_SWITCH_ENABLED = true; // true = intenta cargar automáticamente MPD detectados
+  const AUTO_SWITCH_WHITELIST = []; // vacío = permitir todos los dominios
+  const AUTO_SWITCH_DEBOUNCE_MS = 800; // agrupa detecciones rápidas
+  const AUTO_SWITCH_RETRY_MAX = 4; // reintentos al cargar MPD
+  const AUTO_SWITCH_RETRY_BASE_MS = 700; // backoff base
+
+  // Internals
+  const panel = document.getElementById('fp_mpd_panel'); // oculto por defecto
+  const list = document.getElementById('fp_mpd_list');
+  let found = new Set();
+  let debounceTimer = null;
+  let pendingCandidates = []; // URLs detectadas recientemente
+  let lastAutoSwitched = null; // última URL cargada por auto-switch
+
+  // Sanitiza y normaliza URL relativa
+  function normalizeUrl(u){
+    try{ return (new URL(u, location.href)).href; }catch(e){ return null; }
+  }
+
+  // Si la whitelist está vacía, permitimos todos los dominios
+  function isWhitelisted(url){
+    if(!url) return false;
+    if(!AUTO_SWITCH_WHITELIST || AUTO_SWITCH_WHITELIST.length === 0) return true;
+    try{
+      const h = (new URL(url)).hostname;
+      return AUTO_SWITCH_WHITELIST.includes(h);
+    }catch(e){ return false; }
+  }
+
+  function addMpd(url, source){
+    if(!url) return;
+    const n = normalizeUrl(url);
+    if(!n) return;
+    if(found.has(n)) return;
+    found.add(n);
+    // registrar en DOM (oculto al público) para desarrolladores; no se muestra por defecto
+    const el = document.createElement('div');
+    el.className = 'item';
+    el.textContent = `${source}: ${n}`;
+    list.appendChild(el);
+    console.debug('[MPD DETECT]', source, n);
+    // preparar candidato para auto-switch
+    pendingCandidates.push({url:n, source});
+    scheduleAutoSwitch();
+  }
+
+  // Debounce y selección de candidato
+  function scheduleAutoSwitch(){
+    if(!AUTO_SWITCH_ENABLED) return;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(()=> {
+      // elegir candidato preferente: priorizar mismo dominio, luego por orden detectado
+      const sameHost = pendingCandidates.find(c => {
+        try{ return (new URL(c.url)).hostname === location.hostname; }catch(e){ return false; }
+      });
+      const candidate = sameHost || pendingCandidates[0];
+      pendingCandidates = [];
+      if(candidate) tryAutoSwitch(candidate.url);
+    }, AUTO_SWITCH_DEBOUNCE_MS);
+  }
+
+  // Intentar cargar MPD en Shaka con reintentos y backoff
+  async function tryAutoSwitch(url){
+    if(!AUTO_SWITCH_ENABLED) return;
+    if(!isWhitelisted(url)){
+      console.warn('[MPD AUTOSWITCH] URL no permitida por whitelist:', url);
+      return;
+    }
+    if(lastAutoSwitched === url){
+      console.debug('[MPD AUTOSWITCH] Ya se cargó esta URL:', url);
+      return;
+    }
+
+    // Esperar a que shakaPlayer exista
+    const player = await waitForShaka(5000);
+    if(!player){
+      console.warn('[MPD AUTOSWITCH] Shaka no disponible para cargar:', url);
+      return;
+    }
+
+    // Intentar cargar con reintentos
+    for(let attempt=1; attempt<=AUTO_SWITCH_RETRY_MAX; attempt++){
+      try{
+        console.info(`[MPD AUTOSWITCH] Intento ${attempt} cargar:`, url);
+        // Intentamos un HEAD fetch primero para detectar bloqueos CORS o 404 (silencioso)
+        let headOk = true;
+        try{
+          const resp = await fetch(url, {method:'HEAD', mode:'cors'});
+          if(!resp.ok) headOk = false;
+        }catch(e){
+          headOk = false;
+        }
+        if(!headOk){
+          console.debug('[MPD AUTOSWITCH] HEAD check falló (CORS/404). Se intentará cargar con Shaka de todos modos.');
+        }
+
+        // Cargar manifest en Shaka
+        await player.load(url);
+        console.info('[MPD AUTOSWITCH] Cargado con éxito:', url);
+        lastAutoSwitched = url;
+        try{ window.dispatchEvent(new CustomEvent('fp:mpd-autoswitched',{detail:{url}})); }catch(e){}
+        return;
+      }catch(err){
+        console.warn(`[MPD AUTOSWITCH] Error cargando (intento ${attempt}):`, err);
+        const waitMs = AUTO_SWITCH_RETRY_BASE_MS * Math.pow(2, attempt-1);
+        await new Promise(r=>setTimeout(r, waitMs));
+      }
+    }
+    console.error('[MPD AUTOSWITCH] No se pudo cargar el MPD tras varios intentos:', url);
+  }
+
+  // Espera a que window.shakaPlayer esté disponible (timeout ms)
+  function waitForShaka(timeoutMs){
+    return new Promise(resolve=>{
+      if(window.shakaPlayer) return resolve(window.shakaPlayer);
+      const start = Date.now();
+      const iv = setInterval(()=>{
+        if(window.shakaPlayer){
+          clearInterval(iv);
+          return resolve(window.shakaPlayer);
+        }
+        if(Date.now() - start > timeoutMs){
+          clearInterval(iv);
+          return resolve(null);
+        }
+      }, 200);
+    });
+  }
+
+  // 1) Escaneo inicial del DOM
+  function findMpdsInDom(){
+    const sel = 'a[href], link[href], source[src], script[src], video[src], iframe[src]';
+    document.querySelectorAll(sel).forEach(el=>{
+      const u = el.getAttribute('href') || el.getAttribute('src');
+      if(u && u.toLowerCase().includes('.mpd')) addMpd(u, 'DOM');
+    });
+    // atributos data-*
+    document.querySelectorAll('[data-src],[data-href]').forEach(el=>{
+      const u = el.getAttribute('data-src') || el.getAttribute('data-href');
+      if(u && u.toLowerCase().includes('.mpd')) addMpd(u, 'DOM-data');
+    });
+  }
+
+  // 2) Interceptar fetch y XHR
+  (function interceptNetwork(){
+    if(window.fetch){
+      const origFetch = window.fetch;
+      window.fetch = function(input, init){
+        try{
+          const url = (typeof input === 'string') ? input : (input && input.url);
+          if(url && url.toLowerCase().includes('.mpd')) addMpd(url, 'fetch');
+        }catch(e){}
+        return origFetch.apply(this, arguments);
+      };
+    }
+    const origOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(method, url){
+      try{ if(url && url.toLowerCase().includes('.mpd')) addMpd(url, 'XHR'); }catch(e){}
+      return origOpen.apply(this, arguments);
+    };
+  })();
+
+  // 3) Performance API (post-load)
+  function checkPerformance(){
+    try{
+      const entries = performance.getEntriesByType('resource') || [];
+      entries.forEach(r=>{
+        if(r.name && r.name.toLowerCase().includes('.mpd')) addMpd(r.name, 'performance');
+      });
+    }catch(e){}
+  }
+
+  // 4) Hook para Shaka (si está expuesto)
+  function attachShakaHook(){
+    try{
+      const player = window.shakaPlayer;
+      if(player && player.getNetworkingEngine && !player.__mpdHookAttached){
+        player.__mpdHookAttached = true;
+        try{
+          player.getNetworkingEngine().registerRequestFilter((type, request) => {
+            if(request.uris && request.uris.length){
+              request.uris.forEach(u=>{
+                if(u && u.toLowerCase().includes('.mpd')) addMpd(u, 'shaka');
+              });
+            } else if(request.uris === undefined && request.urisString){
+              const u = request.urisString;
+              if(u && u.toLowerCase().includes('.mpd')) addMpd(u, 'shaka');
+            }
+          });
+          console.debug('Shaka request filter attached for MPD detection');
+        }catch(e){
+          console.warn('No se pudo registrar request filter en Shaka', e);
+        }
+      }
+    }catch(e){}
+  }
+
+  // 5) Observador de DOM para detectar inserciones dinámicas
+  const mo = new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      if(m.addedNodes && m.addedNodes.length){
+        m.addedNodes.forEach(n=>{
+          if(n.nodeType===1){
+            const attrs = ['src','href','data-src','data-href'];
+            attrs.forEach(a=>{
+              const v = n.getAttribute && n.getAttribute(a);
+              if(v && v.toLowerCase().includes('.mpd')) addMpd(v, 'mutation');
+            });
+            n.querySelectorAll && n.querySelectorAll('a[href], link[href], source[src], script[src], video[src]').forEach(el=>{
+              const u = el.getAttribute('href') || el.getAttribute('src');
+              if(u && u.toLowerCase().includes('.mpd')) addMpd(u, 'mutation-inner');
+            });
+          }
+        });
+      }
+    });
+  });
+  mo.observe(document.documentElement || document.body, {childList:true, subtree:true});
+
+  // 6) Exponer función pública para escaneo manual y control
+  window.fp_findMpds = function(){
+    findMpdsInDom();
+    checkPerformance();
+    attachShakaHook();
+    return [...found];
+  };
+
+  // Re-intentar attachShakaHook periódicamente por si initShaka aún no expuso window.shakaPlayer
+  const shakaInterval = setInterval(()=>{
+    attachShakaHook();
+    if(window.shakaPlayer && window.shakaPlayer.__mpdHookAttached) clearInterval(shakaInterval);
+  }, 700);
+
+  // Mostrar/ocultar panel con atajo Ctrl+Shift+M (solo para desarrolladores)
+  window.addEventListener('keydown', (e)=>{
+    if(e.ctrlKey && e.shiftKey && (e.key === 'M' || e.key === 'm')){
+      if(panel.style.display === 'none' || panel.style.display === ''){
+        panel.style.display = 'block';
+        panel.setAttribute('aria-hidden','false');
+      } else {
+        panel.style.display = 'none';
+        panel.setAttribute('aria-hidden','true');
+      }
+    }
+  });
+
+  // Ejecutar detecciones iniciales con pequeños delays para cubrir cargas dinámicas
+  setTimeout(findMpdsInDom, 200);
+  setTimeout(checkPerformance, 500);
+  setTimeout(attachShakaHook, 800);
+
+  // Exponer control runtime para activar/desactivar auto-switch desde consola
+  window.fp_autoswitch = {
+    enabled: AUTO_SWITCH_ENABLED,
+    whitelist: AUTO_SWITCH_WHITELIST,
+    enable(){ this.enabled = true; console.log('fp_autoswitch enabled'); },
+    disable(){ this.enabled = false; console.log('fp_autoswitch disabled'); },
+    setWhitelist(arr){ if(Array.isArray(arr)) this.whitelist = arr; console.log('fp_autoswitch whitelist set', this.whitelist); }
+  };
+
+  // Nota: el panel permanece en el DOM pero oculto al público.
+})();
+</script>
+
+</body>
+</html>
