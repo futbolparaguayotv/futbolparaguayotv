@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player IPTV Fullscreen Logo</title>
+<title>Player IPTV Fullscreen Logo JW</title>
 
 <style>
 html, body {
@@ -57,25 +57,14 @@ html, body {
 #qualityMenu div:hover {
   background: #333;
 }
-
-/* LOGO */
-#playerLogo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 90px;
-  opacity: 0.9;
-  z-index: 9999;
-  pointer-events: none;
-}
 </style>
 </head>
 <body>
 
 <div id="player"></div>
-<img id="playerLogo" src="https://i.imgur.com/7V8wr1v.png">
+
 <div id="channelBar">
-  <div id="channelName">Canal 9</div>
+  <div id="channelName">Goat Futbol</div>
   <div id="channelTime">--:--</div>
 </div>
 
@@ -105,7 +94,15 @@ const player = jwplayer("player").setup({
   controls: true,
   preload: "auto",
   live: { dvrSeekLimit: 3600 },
-  dash: { bufferLength: 6, maxBufferLength: 20 }
+  dash: { bufferLength: 6, maxBufferLength: 20 },
+
+  // 🔥 LOGO JWPlayer (siempre visible, incluso fullscreen)
+  logo: {
+    file: "https://i.imgur.com/7V8wr1v.png",
+    position: "top-left",
+    hide: false,
+    margin: 10
+  }
 });
 
 // Actualizar hora en vivo
