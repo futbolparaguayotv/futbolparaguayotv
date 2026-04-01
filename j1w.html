@@ -1,276 +1,183 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="referrer" content="no-referrer">
-  <meta http-equiv="cache-control" content="no-cache" />
-  <meta http-equiv="expires" content="0" />
-  <meta http-equiv="pragma" content="no-cache" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Reproductor DASH - Preferir máxima calidad automática</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Player PRO</title>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      height: 100%;
-      background: #000;
-    }
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  height: 100%;
+  overflow: hidden;
+}
 
-    #player {
-      width: 100%;
-      height: 100%;
-      max-width: 100%;
-      margin: 0;
-      background-color: #000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.6);
-      position: relative;
-    }
+#player {
+  width: 100%;
+  height: 100%;
+}
 
-    .jwplayer {
-      color: #fff !important;
-      font-family: 'Segoe UI', sans-serif;
-    }
+/* Indicador calidad */
+#qualityLabel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+  z-index: 9999;
+}
 
-    .jw-controlbar {
-      background-color: rgba(20, 20, 20, 0.85) !important;
-      border-top: 1px solid #333;
-    }
+/* Menú calidad */
+#qualityMenu {
+  position: absolute;
+  bottom: 60px;
+  right: 10px;
+  background: rgba(0,0,0,0.85);
+  padding: 8px;
+  border-radius: 6px;
+  z-index: 9999;
+  font-family: Arial;
+}
 
-    .jw-controlbar .jw-button-container {
-      position: absolute !important;
-      top: -46px;
-      left: 0;
-      right: 0;
-      height: 46px;
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.85),
-        rgba(0,0,0,0.35)
-      );
-      border-bottom: 1px solid #333;
-      padding: 4px 8px;
-      z-index: 10;
-    }
+#qualityMenu div {
+  color: #fff;
+  padding: 4px 8px;
+  cursor: pointer;
+}
 
-    .jwplayer video {
-      margin-top: 46px;
-    }
-
-    .jw-button-color { color: #ccc !important; }
-    .jw-button-color:hover { color: #FFD120 !important; }
-    .jw-icon { filter: brightness(1.4); }
-    .jw-time { color: #eee !important; font-size: 12px; }
-    .jw-text-track-display {
-      background-color: rgba(0,0,0,0.6);
-      color: #fff;
-      font-size:16px;
-      font-family:'Segoe UI',sans-serif;
-    }
-    .jw-title { color: #ddd !important; }
-    .jw-display-icon-container { background-color: rgba(0,0,0,0.5); }
-
-    .ios-landscape {
-      transform: rotate(90deg);
-      transform-origin: center center;
-      width: 100vh !important;
-      height: 100vw !important;
-      position: fixed !important;
-      top: 0;
-      left: 0;
-      background: #000;
-      z-index: 9999;
-    }
-  </style>
+#qualityMenu div:hover {
+  background: #333;
+}
+</style>
 </head>
 
 <body>
-  <div id="player" allow="fullscreen; screen-orientation-lock"></div>
 
-  <script src="https://ssl.p.jwpcdn.com/player/v/8.32.0/jwplayer.js"></script>
-  <script>
-    jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
+<div id="player"></div>
+<div id="qualityLabel">AUTO</div>
+<div id="qualityMenu"></div>
 
-    function iniciarReproductor() {
-      const mpdUrl = "https://cors-proxy.cooks.fyi/https://cdnlb.gigared.com.ar/live/eds/Canal_9/sa_live_dash/Canal_9.mpd";
-      const clearKeys = {
-        keyId: "eaecaad505a66fab4161959099767384",
-        key: "ca66afd7ba0f3ce767b698b5e94c84e3"
-      };
+<script src="https://ssl.p.jwpcdn.com/player/v/8.32.0/jwplayer.js"></script>
 
-      const player = jwplayer("player").setup({
-        playlist: [{
-          sources: [{
-            default: true,
-            type: "dash",
-            file: mpdUrl,
-            drm: { clearkey: { keyId: clearKeys.keyId, key: clearKeys.key } },
-            label: "HD"
-          }]
-        }],
-        width: "100%",
-        height: "100%",
-        aspectratio: "16:9",
-        autostart: false,
-        mute: false,
-        preload: "auto",
-        live: { dvrSeekLimit: 3600, edgeMargin: 5 },
-        dash: { bufferLength: 3, maxBufferLength: 10 }, // buffer más tolerante para calidades altas
-        displaytitle: true,
-        displaydescription: false,
-        controls: true
-      });
+<script>
+jwplayer.key = "XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo"; // ← pon tu key
 
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-      const isSmartTV = /SmartTV|Tizen|Web0S|SmartHub|Chromecast/i.test(navigator.userAgent);
+const mpdUrl = "https://cors-proxy.cooks.fyi/https://cdnlb.gigared.com.ar/live/eds/Canal_9/sa_live_dash/Canal_9.mpd";
 
-      if (isSmartTV) {
-        player.on("ready", function () {
-          const video = document.querySelector("#player video");
-          if (video) {
-            video.muted = false;
-            try { video.volume = 1.0; } catch(e){}
-          }
-        });
-      }
-
-      // Preferir pista de audio si aplica
-      const preferredAudioLangIndex = 1;
-      player.on("play", () => {
-        try { player.setCurrentAudioTrack(preferredAudioLangIndex); }
-        catch(e) {}
-      });
-
-      // Manejo de fullscreen y orientación
-      player.on("fullscreen", function(e) {
-        const contenedor = document.getElementById("player");
-        if (!isIOS && screen.orientation) {
-          if (e.fullscreen) {
-            const tryLock = async () => {
-              try { await screen.orientation.lock("landscape"); }
-              catch(err) { setTimeout(tryLock, 200); }
-            };
-            tryLock();
-          } else {
-            try { screen.orientation.unlock(); } catch(err) {}
-          }
-        }
-        if (isIOS) {
-          if (e.fullscreen) contenedor.classList.add("ios-landscape");
-          else contenedor.classList.remove("ios-landscape");
-        }
-      });
-
-      // --- Lógica para que "Automático" prefiera la mayor calidad disponible ---
-      // Estrategia:
-      // 1) Detectar niveles y elegir el índice con mayor bitrate/altura.
-      // 2) Aplicar ese índice inicialmente.
-      // 3) Si ABR baja la calidad, intentar re-aplicar la máxima con backoff,
-      //    salvo que haya buffering (en ese caso permitir bajar).
-      let highestIndex = null;
-      let lastForcedAt = 0;
-      const FORCE_COOLDOWN_MS = 8000; // no forzar más seguido que esto
-      const BACKOFF_MULTIPLIER = 2;
-      let currentBackoff = FORCE_COOLDOWN_MS;
-
-      function tryForceHighest(reason) {
-        const now = Date.now();
-        if (highestIndex === null) return;
-        if (now - lastForcedAt < currentBackoff) return;
-        try {
-          player.setCurrentQuality(highestIndex);
-          lastForcedAt = now;
-          // aumentar backoff si se fuerza repetidamente
-          currentBackoff = Math.min(currentBackoff * BACKOFF_MULTIPLIER, 60000);
-          console.log('Forzando calidad máxima (índice):', highestIndex, 'motivo:', reason);
-        } catch (e) {
-          console.warn('setCurrentQuality falló al forzar:', e);
+const player = jwplayer("player").setup({
+  playlist: [{
+    sources: [{
+      file: mpdUrl,
+      type: "dash",
+      drm: {
+        clearkey: {
+          keyId: "eaecaad505a66fab4161959099767384",
+          key: "ca66afd7ba0f3ce767b698b5e94c84e3"
         }
       }
+    }]
+  }],
+  width: "100%",
+  height: "100%",
+  autostart: false,
+  controls: true,
+  preload: "auto",
+  live: { dvrSeekLimit: 3600 },
+  dash: { bufferLength: 6, maxBufferLength: 20 }
+});
 
-      // Cuando JW Player expone niveles
-      player.on('levels', function(data) {
-        try {
-          const levels = data.levels || [];
-          console.log('Niveles recibidos:', levels);
-          if (!levels.length) {
-            highestIndex = null;
-            return;
-          }
+let levelsList = [];
+let highestIndex = null;
+let safeIndex = null;
+let autoMode = true;
 
-          // Elegir el mejor nivel por bitrate y altura
-          let bestIdx = 0;
-          let bestMetric = -1;
-          levels.forEach((lvl, i) => {
-            const bandwidth = lvl.bandwidth || 0;
-            const height = lvl.height || 0;
-            const metric = (bandwidth * 1.0) + (height * 1000); // ponderar height para preferir resolución
-            if (metric > bestMetric) { bestMetric = metric; bestIdx = i; }
-          });
+const label = document.getElementById("qualityLabel");
+const menu = document.getElementById("qualityMenu");
 
-          highestIndex = bestIdx;
-          currentBackoff = FORCE_COOLDOWN_MS; // reset backoff al detectar niveles
-          // Aplicar la mayor calidad disponible inicialmente
-          try {
-            player.setCurrentQuality(highestIndex);
-            lastForcedAt = Date.now();
-            console.log('Aplicada calidad inicial (mayor):', highestIndex, levels[highestIndex]);
-          } catch (err) {
-            console.warn('No se pudo aplicar calidad inicial:', err);
-          }
-        } catch (err) {
-          console.warn('Error procesando niveles:', err);
-        }
-      });
+// Detectar calidades
+player.on("levels", function(data) {
+  levelsList = data.levels || [];
+  if (!levelsList.length) return;
 
-      // Si ABR cambia la calidad visual, intentamos re-forzar la máxima si baja
-      player.on('visualQuality', function(info) {
-        try {
-          // info: { mode: 'auto'|'manual', level: index, label: '720p', ... }
-          if (!info) return;
-          // Si estamos en modo auto y la calidad actual es menor que la máxima, intentar forzar
-          if (info.mode === 'auto' && highestIndex !== null && typeof info.level === 'number') {
-            if (info.level < highestIndex) {
-              tryForceHighest('visualQuality detectó nivel inferior');
-            } else {
-              // si alcanzó la máxima, reducir backoff para permitir reintentos futuros
-              currentBackoff = FORCE_COOLDOWN_MS;
-            }
-          }
-        } catch (e) {
-          console.warn('Error en visualQuality handler:', e);
-        }
-      });
+  const sorted = levelsList.map((lvl, i) => ({
+    i,
+    height: lvl.height || 0,
+    bandwidth: lvl.bandwidth || 0
+  })).sort((a, b) => (b.height + b.bandwidth) - (a.height + a.bandwidth));
 
-      // Si hay buffering, permitir que ABR baje la calidad y resetear backoff
-      player.on('buffer', function() {
-        try {
-          // permitir bajar: no forzamos mientras haya buffering
-          currentBackoff = FORCE_COOLDOWN_MS * 2;
-          console.log('Buffering detectado: permitiendo bajar calidad');
-        } catch(e){}
-      });
+  highestIndex = sorted[0].i;
+  safeIndex = sorted[1] ? sorted[1].i : highestIndex;
 
-      // Si hay error de reproducción, no forzar
-      player.on('error', function(err) {
-        console.error('Error JW Player:', err);
-      });
+  // iniciar en calidad estable
+  setTimeout(() => {
+    player.setCurrentQuality(safeIndex);
+  }, 1000);
 
-      player.on('setupError', function(err) {
-        console.error('Setup error:', err);
-      });
+  crearMenu();
+});
 
-      // Diagnóstico opcional en consola al estar listo
-      player.on('ready', function() {
-        try {
-          const latency = player.getLiveLatency?.();
-          console.log('Latencia / DVR:', latency, 'segundos');
-        } catch(e){}
-      });
-    }
+// Crear menú calidad
+function crearMenu() {
+  menu.innerHTML = "";
 
-    window.onload = iniciarReproductor;
-  </script>
+  // AUTO
+  const autoBtn = document.createElement("div");
+  autoBtn.innerText = "AUTO";
+  autoBtn.onclick = () => {
+    autoMode = true;
+    label.innerText = "AUTO";
+  };
+  menu.appendChild(autoBtn);
+
+  // niveles
+  levelsList.forEach((lvl, i) => {
+    const btn = document.createElement("div");
+    btn.innerText = (lvl.height || "?") + "p";
+
+    btn.onclick = () => {
+      autoMode = false;
+      player.setCurrentQuality(i);
+      label.innerText = btn.innerText;
+    };
+
+    menu.appendChild(btn);
+  });
+}
+
+// AUTO inteligente
+let lastStable = Date.now();
+
+player.on("time", function() {
+  if (!autoMode || highestIndex === null) return;
+
+  const now = Date.now();
+
+  if (now - lastStable > 8000) {
+    try {
+      player.setCurrentQuality(highestIndex);
+    } catch(e){}
+  }
+});
+
+// Buffer → no forzar
+player.on("buffer", function() {
+  lastStable = Date.now();
+});
+
+// Mostrar calidad actual
+player.on("visualQuality", function(info) {
+  if (!info) return;
+
+  if (autoMode) {
+    label.innerText = "AUTO " + (info.label || "");
+  }
+});
+</script>
+
 </body>
 </html>
