@@ -19,17 +19,6 @@ html, body {
   height: 100%;
 }
 
-/* 🎬 Logo personalizado */
-#appLogo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 90px;
-  opacity: 0.9;
-  z-index: 9999;
-  pointer-events: none;
-}
-
 /* Indicador calidad */
 #qualityLabel {
   position: absolute;
@@ -70,10 +59,6 @@ html, body {
 <body>
 
 <div id="player"></div>
-
-<!-- 🔥 TU LOGO -->
-<img id="appLogo" src="https://i.imgur.com/7V8wr1v.png">
-
 <div id="qualityLabel">AUTO</div>
 <div id="qualityMenu"></div>
 
@@ -103,6 +88,24 @@ const player = jwplayer("player").setup({
   preload: "auto",
   live: { dvrSeekLimit: 3600 },
   dash: { bufferLength: 6, maxBufferLength: 20 }
+});
+
+// 🔥 LOGO dentro del player (funciona en fullscreen)
+player.on("ready", function() {
+  const container = document.querySelector("#player");
+
+  const logo = document.createElement("img");
+  logo.src = "https://i.imgur.com/7V8wr1v.png";
+
+  logo.style.position = "absolute";
+  logo.style.top = "10px";
+  logo.style.left = "10px";
+  logo.style.width = "90px";
+  logo.style.opacity = "0.9";
+  logo.style.zIndex = "9999";
+  logo.style.pointerEvents = "none";
+
+  container.appendChild(logo);
 });
 
 let levelsList = [];
@@ -160,7 +163,7 @@ function crearMenu() {
   });
 }
 
-// AUTO inteligente
+// AUTO inteligente (sin cortes)
 let lastStable = Date.now();
 
 player.on("time", function() {
