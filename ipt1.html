@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-  <script src="https://unsettledradiator.com/55/e8/cb/55e8cb90311be645dd27b181f2cf3730.js"></script>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Player IPTV Fullscreen Logo</title>
@@ -61,19 +58,6 @@ html, body {
   background: #333;
 }
 
-/* Indicador calidad flotante */
-#qualityLabel {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 6px;
-  z-index: 9999;
-  font-size: 13px;
-}
-
 /* LOGO */
 #playerLogo {
   position: absolute;
@@ -89,13 +73,13 @@ html, body {
 <body>
 
 <div id="player"></div>
+<img id="playerLogo" src="https://i.imgur.com/7V8wr1v.png">
 <div id="channelBar">
-  <div id="channelName">Goat Futbol</div>
+  <div id="channelName">Canal 9</div>
   <div id="channelTime">--:--</div>
 </div>
 
 <div id="qualityMenu"></div>
-<div id="qualityLabel">AUTO</div>
 
 <script src="https://ssl.p.jwpcdn.com/player/v/8.32.0/jwplayer.js"></script>
 <script>
@@ -124,15 +108,6 @@ const player = jwplayer("player").setup({
   dash: { bufferLength: 6, maxBufferLength: 20 }
 });
 
-// 🔥 LOGO dentro del contenedor JW Player
-player.on("ready", function() {
-  const container = document.querySelector("#player");
-  const logo = document.createElement("img");
-  logo.id = "playerLogo";
-  logo.src = "https://i.imgur.com/7V8wr1v.png";
-  container.appendChild(logo);
-});
-
 // Actualizar hora en vivo
 function actualizarHora() {
   const now = new Date();
@@ -149,7 +124,6 @@ let highestIndex = null;
 let safeIndex = null;
 let autoMode = true;
 
-const label = document.getElementById("qualityLabel");
 const menu = document.getElementById("qualityMenu");
 
 player.on("levels", function(data) {
@@ -173,13 +147,13 @@ player.on("levels", function(data) {
   menu.innerHTML = "";
   const autoBtn = document.createElement("div");
   autoBtn.innerText = "AUTO";
-  autoBtn.onclick = () => { autoMode = true; label.innerText = "AUTO"; };
+  autoBtn.onclick = () => { autoMode = true; };
   menu.appendChild(autoBtn);
 
   levelsList.forEach((lvl, i) => {
     const btn = document.createElement("div");
     btn.innerText = (lvl.height || "?") + "p";
-    btn.onclick = () => { autoMode = false; player.setCurrentQuality(i); label.innerText = btn.innerText; };
+    btn.onclick = () => { autoMode = false; player.setCurrentQuality(i); };
     menu.appendChild(btn);
   });
 });
@@ -194,10 +168,6 @@ player.on("time", function() {
   }
 });
 player.on("buffer", function() { lastStable = Date.now(); });
-player.on("visualQuality", function(info) {
-  if (!info) return;
-  if (autoMode) label.innerText = "AUTO " + (info.label || "");
-});
 </script>
 
 </body>
