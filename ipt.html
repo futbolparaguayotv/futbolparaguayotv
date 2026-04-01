@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player IPTV</title>
+<title>Player IPTV Fullscreen Logo</title>
 
 <style>
 html, body {
@@ -18,17 +18,6 @@ html, body {
   width: 100%;
   height: 100%;
   position: relative;
-}
-
-/* LOGO */
-#logo {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 90px;
-  opacity: 0.9;
-  z-index: 9999;
-  pointer-events: none;
 }
 
 /* BARRA TIPO CANAL */
@@ -81,14 +70,24 @@ html, body {
   z-index: 9999;
   font-size: 13px;
 }
+
+/* LOGO */
+#playerLogo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 90px;
+  opacity: 0.9;
+  z-index: 9999;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
 
 <div id="player"></div>
-<img id="logo" src="https://i.imgur.com/7V8wr1v.png">
 <div id="channelBar">
-  <div id="channelName">Canal 9</div>
+  <div id="channelName">Goat Futbol</div>
   <div id="channelTime">--:--</div>
 </div>
 
@@ -120,6 +119,15 @@ const player = jwplayer("player").setup({
   preload: "auto",
   live: { dvrSeekLimit: 3600 },
   dash: { bufferLength: 6, maxBufferLength: 20 }
+});
+
+// 🔥 LOGO dentro del contenedor JW Player
+player.on("ready", function() {
+  const container = document.querySelector("#player");
+  const logo = document.createElement("img");
+  logo.id = "playerLogo";
+  logo.src = "https://i.imgur.com/7V8wr1v.png";
+  container.appendChild(logo);
 });
 
 // Actualizar hora en vivo
@@ -182,7 +190,6 @@ player.on("time", function() {
     try { player.setCurrentQuality(highestIndex); } catch(e){}
   }
 });
-
 player.on("buffer", function() { lastStable = Date.now(); });
 player.on("visualQuality", function(info) {
   if (!info) return;
