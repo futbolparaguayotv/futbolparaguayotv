@@ -1,71 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Player IPTV</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
-<style>
-body { margin:0; background:#000; color:#fff; font-family:Arial; }
-#video { width:100%; height:60vh; background:#000; }
-.channel { padding:10px; border-bottom:1px solid #333; cursor:pointer; }
-.channel:hover { background:#111; }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>telepy2000 - Sintonizador de TV</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/shaka-player.ui.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.3.5/dist/controls.min.css" />
+    <style>
+        /* Estilos base del sistema */
+        body, html { margin:0; padding:0; width:100%; height:100%; background:#000; overflow:hidden; font-family:'IBM Plex Mono', monospace; color:#fff; }
+        #video-container { position:relative; width:100%; height:100%; background:#000; display:flex; align-items:center; justify-content:center; }
+        video { width:100%; height:100%; object-fit: contain; }
+        
+        /* OSD y Guía (Resumen) */
+        .osd { position:absolute; bottom:40px; left:40px; z-index:10; pointer-events:none; opacity:0; transition:opacity 0.3s; }
+        .osd.show { opacity:1; }
+        .ch-info { display:flex; align-items:baseline; gap:15px; }
+        .ch-num { font-size:60px; font-weight:700; color:#0f0; }
+        .ch-name { font-size:32px; text-transform:uppercase; }
+        
+        /* Guía de canales */
+        #guide-menu { position:fixed; top:0; left:-350px; width:300px; height:100%; background:rgba(0,0,0,0.9); border-right:2px solid #333; z-index:100; transition:left 0.3s; padding:20px; overflow-y:auto; }
+        #guide-menu.open { left:0; }
+        .guide-item { padding:10px; border-bottom:1px solid #222; cursor:pointer; }
+        .guide-item:hover, .guide-item.active { background:#111; color:#0f0; }
+    </style>
 </head>
-
 <body>
 
-<video id="video" controls autoplay></video>
+<div id="video-container">
+    <video id="main-video" autoplay playsinline></video>
+    <div id="osd" class="osd">
+        <div class="ch-info">
+            <span id="osd-num" class="ch-num">01</span>
+            <span id="osd-name" class="ch-name">CARGANDO...</span>
+        </div>
+    </div>
+</div>
 
-<div id="list"></div>
+<div id="guide-menu">
+    <h2 style="color:#0f0">CANALES</h2>
+    <div id="guide-list"></div>
+</div>
 
 <script>
-const vid = document.getElementById("video");
-let shakaInstance = new shaka.Player(vid);
-
-// ==================== DASH CHANNELS ====================
-const dashChannels = {
-  "espn": {
-    mpd: "https://cdn.cvattv.com.ar/live/c3eds/ESPN2HD/SA_Live_dash_enc_2A_wl/ESPN2HD.mpd",
-    keys: { "e884b711ab111beb8a7ba1e7bcbdc9bf": "cb89ee3961599e3e648a5aad60895f34" }
-  },
-  "espn2": {
-    mpd: "https://cdn.cvattv.com.ar/live/c6eds/ESPN2_Arg/SA_Live_dash_enc_2A_wl/ESPN2_Arg.mpd",
-    keys: { "65a5bfa3c7a72dde60be9b0c7406c8fc": "0b40ae9f78a7bac3b57ecbf72d3c081e" }
-  }
-};
-
-// ==================== CHANNEL LIST ====================
+// ==================== LISTA DE CANALES ====================
 const channels = [
-  { name: "ESPN", id: "espn" },
-  { name: "ESPN 2", id: "espn2" }
+    { name: "Telefuturo", id: "telefuturo", desc: "Canal 4", type: "hls", url: "https://telefuturo-scraper.vercel.app/api/telefuturo" },
+    { name: "SNT", id: "snt", desc: "Canal 9", type: "hls", url: "https://snt-scraper.vercel.app/api/snt" },
+    { name: "Trece", id: "trece", desc: "Canal 13", type: "hls", url: "https://trece-scraper.vercel.app/api/trece" },
+    { name: "ABC TV", id: "abctv", desc: "Noticias", type: "hls", url: "https://vcp.unored.tv/abctv/live/playlist.m3u8" },
+    { name: "GEN", id: "gen", desc: "Actualidad", type: "hls", url: "https://unlimited1-cl.dps.live/gen/gen.py/playlist.m3u8" },
+    { name: "3ventos (DASH)", id: "3ventos", desc: "Deportes", type: "dash" },
+    // NUEVOS CANALES ESPN AGREGADOS
+    { name: "ESPN", id: "espn_dash", desc: "Deportes", type: "dash" },
+    { name: "ESPN 2", id: "espn2_dash", desc: "Deportes", type: "dash" }
 ];
 
-// ==================== LOAD CHANNEL ====================
-async function loadCH(id) {
-  if (dashChannels[id]) {
-    const { mpd, keys } = dashChannels[id];
-    try {
-      shakaInstance.configure({ drm: { clearKeys: keys } });
-      await shakaInstance.load(mpd);
-      vid.play().catch(()=>{});
-    } catch(e) {
-      console.error("DASH error:", e);
-    }
-  }
+let current = 0;
+const vid = document.getElementById('main-video');
+let hlsInstance = null;
+let shakaInstance = null;
+
+async function initPlayer() {
+    shaka.polyfill.installAll();
+    shakaInstance = new shaka.Player(vid);
+    renderGuide();
+    loadCH(0);
 }
 
-// ==================== UI ====================
-const list = document.getElementById("list");
+async function loadCH(idx) {
+    current = idx;
+    const channel = channels[idx];
+    
+    // Reset players
+    if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+    await shakaInstance.unload();
 
-channels.forEach(ch => {
-  const div = document.createElement("div");
-  div.className = "channel";
-  div.innerText = ch.name;
-  div.onclick = () => loadCH(ch.id);
-  list.appendChild(div);
+    // Actualizar OSD
+    document.getElementById('osd-num').innerText = (idx + 1).toString().padStart(2, '0');
+    document.getElementById('osd-name').innerText = channel.name;
+    showOSD();
+
+    // Lógica DASH (Eventos y ESPN)
+    if (channel.type === 'dash') {
+        let keys = {};
+        let mpd = "";
+
+        if (channel.id === '3ventos') {
+            keys = { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" };
+            mpd = 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd';
+        } else if (channel.id === 'espn_dash') {
+            keys = { "e884b711ab111beb8a7ba1e7bcbdc9bf": "cb89ee3961599e3e648a5aad60895f34" };
+            mpd = 'https://cdn.cvattv.com.ar/live/c3eds/ESPN2HD/SA_Live_dash_enc_2A_wl/ESPN2HD.mpd';
+        } else if (channel.id === 'espn2_dash') {
+            keys = { "65a5bfa3c7a72dde60be9b0c7406c8fc": "0b40ae9f78a7bac3b57ecbf72d3c081e" };
+            mpd = 'https://cdn.cvattv.com.ar/live/c6eds/ESPN2_Arg/SA_Live_dash_enc_2A_wl/ESPN2_Arg.mpd';
+        }
+
+        try {
+            shakaInstance.configure({ 
+                drm: { clearKeys: keys },
+                streaming: { bufferingGoal: 30 } 
+            });
+            await shakaInstance.load(mpd);
+            vid.play();
+        } catch (e) { console.error("Error DASH:", e); }
+        return;
+    }
+
+    // Lógica HLS
+    if (Hls.isSupported()) {
+        hlsInstance = new Hls();
+        hlsInstance.loadSource(channel.url);
+        hlsInstance.attachMedia(vid);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => vid.play());
+    }
+}
+
+function showOSD() {
+    const osd = document.getElementById('osd');
+    osd.classList.add('show');
+    clearTimeout(window.osdTimeout);
+    window.osdTimeout = setTimeout(() => osd.classList.remove('show'), 4000);
+}
+
+function renderGuide() {
+    const list = document.getElementById('guide-list');
+    channels.forEach((ch, i) => {
+        const d = document.createElement('div');
+        d.className = 'guide-item';
+        d.innerHTML = `<strong>CH ${i+1}</strong> - ${ch.name}`;
+        d.onclick = () => loadCH(i);
+        list.appendChild(d);
+    });
+}
+
+// Teclas para cambiar canales
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp') loadCH((current - 1 + channels.length) % channels.length);
+    if (e.key === 'ArrowDown') loadCH((current + 1) % channels.length);
+    if (e.key === 'm') document.getElementById('guide-menu').classList.toggle('open');
 });
-</script>
 
+initPlayer();
+</script>
 </body>
 </html>
