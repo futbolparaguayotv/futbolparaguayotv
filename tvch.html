@@ -542,6 +542,7 @@
       { name: "4D MÁS",        id: "4dmas",         desc: "Noticias",       type: "hls" },
       { name: "3VENTOS",       id: "3ventos",       desc: "Eventos",        type: "dash" },
       { name: "EVENTO 2",      id: "evento2",       desc: "Deportes",       type: "dash" },
+      { name: "NOTICIAS PY", id: "noticiaspy", desc: "Noticias", type: "dash" },
       { name: "Rock 2000s",        id: "youtube_VbTYnJshTas", desc: "Top 2000s Rock Songs", type: "youtube" },
       { name: "NEXT HD",       id: "nexthd",        desc: "Canal HD",       type: "hls", url: "https://live.enhdtv.com:19360/nexthd/nexthd.m3u8" },
       { name: "COSMOS TV",     id: "cosmostv",      desc: "Entretenimiento",type: "hls", url: "https://video.hostingcaaguazu.com:19360/cosmostv/cosmostv.m3u8" },
@@ -574,9 +575,6 @@
       { name: "RED INTERIOR TV",id:"redinteriortv", desc: "Regional",       type: "hls", url: "https://video.wilohosting.com:19360/redinteriortv/redinteriortv.m3u8" },
       { name: "EL OBSERVADOR", id: "elobservador",  desc: "Noticias",       type: "hls", url: "https://video.hostingcaaguazu.com:19360/elobservador/elobservador.m3u8" },
       { name: "SUCESO TV",     id: "sucesotv",      desc: "Regional",       type: "hls", url: "https://live.enhdtv.com:8081/8060/tracks-v1a1/mono.m3u8" }
-      { name: "ESPN", id: "espn_dash", desc: "Deportes", type: "dash" },
-      { name: "ESPN 2", id: "espn2_dash", desc: "Deportes", type: "dash" }
-  
     ];
     // ==================== VARIABLES GLOBALES ====================
     let current = 0;
@@ -744,29 +742,22 @@
 
 
       // DASH con Shaka
-      if (id === '3ventos' || id === 'evento2') {
-        const keys = id === '3ventos'
-          ? { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" }
-          : { "1c62a216a5fe423f959cb1ca02f62d83": "54f2fdc83c1da33cd9269bf21e08218c" };
-        const mpd = id === '3ventos'
-          ? 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd?dvr_window_length=30'
-          : 'https://d3kzwqwnq1f7tq.cloudfront.net/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd?dvr_window_length=30';
-        else if (id === 'espn_dash') {
-        keys = { "e884b711ab111beb8a7ba1e7bcbdc9bf": "cb89ee3961599e3e648a5aad60895f34" };
-        mpd = 'https://cdn.cvattv.com.ar/live/c3eds/ESPN2HD/SA_Live_dash_enc_2A_wl/ESPN2HD.mpd';
-    } else if (id === 'espn2_dash') {
-        keys = { "65a5bfa3c7a72dde60be9b0c7406c8fc": "0b40ae9f78a7bac3b57ecbf72d3c081e" };
-        mpd = 'https://cdn.cvattv.com.ar/live/c6eds/ESPN2_Arg/SA_Live_dash_enc_2A_wl/ESPN2_Arg.mpd';
-    }
-    try {
-        shakaInstance.configure({ drm: { clearKeys: keys } });
-        await shakaInstance.load(mpd);
-        vid.play().catch(()=>{});
-        setTimeout(clearNoise, 500);
-    } catch(e) { clearNoise(); }
-    return;
-}
-    try {
+      if (id === '3ventos' || id === 'evento2' || id === 'noticiaspy') {
+        let keys, mpd;
+
+        if (id === '3ventos') {
+          keys = { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" };
+          mpd = 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd?dvr_window_length=30';
+        }
+        else if (id === 'evento2') {
+          keys = { "1c62a216a5fe423f959cb1ca02f62d83": "54f2fdc83c1da33cd9269bf21e08218c" };
+          mpd = 'https://d3kzwqwnq1f7tq.cloudfront.net/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd?dvr_window_length=30';
+        }
+        else if (id === 'noticiaspy') {
+          keys = { "8f66fe15735b2b1b3d5eb3646caa405e": "404b93fd7b499b1061c9a714e1cdb2d0" };
+          mpd = 'https://cdn.cvattv.com.ar/live/c4eds/NOTICIAS_PY_C4/SA_Live_dash_enc_2A_wl/NOTICIAS_PY_C4.mpd';
+        }
+        try {
           shakaInstance.configure({ drm: { clearKeys: keys } });
           await shakaInstance.load(mpd);
           vid.play().catch(()=>{});
@@ -990,23 +981,21 @@
 
       // ── DASH con Shaka por ventana (3ventos / evento2) ──
       if (channel.type === 'dash') {
-        const keys = id === '3ventos'
-          ? { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" }
-          : { "1c62a216a5fe423f959cb1ca02f62d83": "54f2fdc83c1da33cd9269bf21e08218c" };
-        const mpd = id === '3ventos'
-          ? 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd?dvr_window_length=30'
-          : 'https://d3kzwqwnq1f7tq.cloudfront.net/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd?dvr_window_length=30';
-        if (id === 'espn_dash') {
-        keys = { "e884b711ab111beb8a7ba1e7bcbdc9bf": "cb89ee3961599e3e648a5aad60895f34" };
-        mpd = 'https://cdn.cvattv.com.ar/live/c3eds/ESPN2HD/SA_Live_dash_enc_2A_wl/ESPN2HD.mpd';
-    } else if (id === 'espn2_dash') {
-        keys = { "65a5bfa3c7a72dde60be9b0c7406c8fc": "0b40ae9f78a7bac3b57ecbf72d3c081e" };
-        mpd = 'https://cdn.cvattv.com.ar/live/c6eds/ESPN2_Arg/SA_Live_dash_enc_2A_wl/ESPN2_Arg.mpd';
-    } else if (id === '3ventos') {
-        keys = { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" };
-        mpd = 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd';
-    }
-      try {
+        let keys, mpd;
+
+        if (id === '3ventos') {
+          keys = { "49b2c0e7037042b2aff9f064e0bb3311": "83849e30adf85440550292693147fbf7" };
+          mpd = 'https://d2jluxxgx550su.cloudfront.net/out/v1/62de20495af84f908fa8963f50c44d46/index.mpd?dvr_window_length=30';
+        }
+        else if (id === 'evento2') {
+          keys = { "1c62a216a5fe423f959cb1ca02f62d83": "54f2fdc83c1da33cd9269bf21e08218c" };
+          mpd = 'https://d3kzwqwnq1f7tq.cloudfront.net/out/v1/25ca218d53194065bedf6d998ace462e/index.mpd?dvr_window_length=30';
+        }
+        else if (id === 'noticiaspy') {
+          keys = { "8f66fe15735b2b1b3d5eb3646caa405e": "404b93fd7b499b1061c9a714e1cdb2d0" };
+          mpd = 'https://cdn.cvattv.com.ar/live/c4eds/NOTICIAS_PY_C4/SA_Live_dash_enc_2A_wl/NOTICIAS_PY_C4.mpd';
+        }
+        try {
           const sk = new shaka.Player(video);
           sk.configure({ drm: { clearKeys: keys } });
           await sk.load(mpd);
