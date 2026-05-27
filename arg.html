@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Laguna Paiva IPTV</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+   <script src="https://unpkg.com/lucide@latest"></script>
+   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+   <style>
+       @import url('https://fonts.googleapis.com/css2?family=Onest:wght@300;400;700;900&display=swap');
+      
+       body {
+           font-family: 'Onest', sans-serif;
+           background-color: #050505;
+           color: white;
+           margin: 0;
+           overflow: hidden;
+           height: 100vh;
+       }
+       /* Layout Base */
+       .grid-container {
+           display: grid;
+           grid-template-areas: "nav main";
+           grid-template-columns: 350px 1fr;
+           height: 100vh;
+       }
+       /* Ajustes para Celulares (Pantalla vertical) */
+       @media (max-width: 1024px) {
+           .grid-container {
+               grid-template-areas:
+                   "main"
+                   "nav";
+               grid-template-columns: 1fr;
+               grid-template-rows: 35vh 65vh;
+           }
+       }
+       /* Forzar Landscape en Fullscreen */
+       #player-section:fullscreen {
+           width: 100vw;
+           height: 100vh;
+           background: black;
+       }
+       #sidebar { grid-area: nav; }
+       #player-section { grid-area: main; }
+       .custom-scroll::-webkit-scrollbar { width: 6px; }
+       .custom-scroll::-webkit-scrollbar-track { background: #0a0a0a; }
+       .custom-scroll::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
+       .active-channel {
+           background: linear-gradient(90deg, #1e3a8a 0%, #09090b 100%) !important;
+           border-left: 4px solid #3b82f6 !important;
+       }
+       .video-gradient-top {
+           background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
+       }
+       .video-gradient-bottom {
+           background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+       }
+       video { outline: none; object-fit: contain; }
+   </style>
+</head>
+<body>
+<div class="grid-container">
+  
+   <aside id="sidebar" class="bg-zinc-950 border-r border-zinc-800 flex flex-col overflow-hidden">
+       <div class="p-5 space-y-4">
+           <div class="flex items-center gap-3">
+               <div class="bg-blue-600 p-2 rounded-lg shadow-lg shadow-blue-900/20">
+                   <i data-lucide="tv-2" class="text-white w-5 h-5"></i>
+               </div>
+               <h1 class="text-xl font-black tracking-tighter italic uppercase">LAGUNA PAIVA <span class="text-blue-500">IPTV</span></h1>
+           </div>
+          
+           <div class="relative">
+               <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-zinc-500"></i>
+               <input id="searchInput" type="text" placeholder="Buscar entre canales..."
+                      class="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+           </div>
+       </div>
+       <div id="channelList" class="flex-1 overflow-y-auto custom-scroll px-3 pb-10 space-y-1">
+           </div>
+   </aside>
+
+   <main id="player-section" class="relative group bg-black flex flex-col overflow-hidden">
+       <div class="absolute top-0 left-0 w-full z-20 p-6 md:p-10 video-gradient-top opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+           <div class="flex items-center gap-4 md:gap-6">
+               <img id="currentLogo" src="" class="w-12 h-12 md:w-20 md:h-20 object-contain bg-white rounded-lg p-1.5 shadow-2xl" onerror="this.style.display='none'">
+               <div>
+                   <span id="currentCat" class="text-blue-500 font-bold text-[10px] md:text-xs uppercase tracking-[0.2em]">SINTONIZANDO</span>
+                   <h2 id="playerTitle" class="text-2xl md:text-5xl font-black uppercase leading-tight">Selecciona un canal</h2>
+               </div>
+           </div>
+       </div>
+       <div class="flex-1 relative flex items-center justify-center bg-zinc-950">
+           <video id="mainVideo" class="w-full h-full max-h-screen" playsinline crossorigin="anonymous"></video>
+           <div id="loader" class="absolute inset-0 flex items-center justify-center bg-black/50 z-10 hidden">
+               <div class="animate-spin rounded-full h-14 w-14 border-4 border-blue-600 border-t-transparent"></div>
+           </div>
+       </div>
+       <div class="absolute bottom-0 left-0 w-full z-20 p-6 md:p-8 video-gradient-bottom opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+           <div class="flex items-center justify-between gap-4">
+               <div class="flex items-center gap-4 md:gap-8">
+                   <button onclick="togglePlay()" class="hover:scale-110 active:scale-95 transition-all bg-white/10 p-3 rounded-full backdrop-blur-md">
+                       <i id="playBtn" data-lucide="play" class="w-6 h-6 md:w-8 md:h-8 fill-white text-white"></i>
+                   </button>
+                   <div class="hidden sm:flex items-center gap-3 bg-white/5 p-2 px-4 rounded-2xl border border-white/10">
+                       <i data-lucide="volume-2" class="w-4 h-4 text-zinc-400"></i>
+                       <input type="range" min="0" max="1" step="0.1" value="1" oninput="setVolume(this.value)" class="w-20 md:w-32 accent-blue-500 cursor-pointer">
+                   </div>
+               </div>
+               <button onclick="handleFullscreen()" class="flex items-center gap-2 bg-blue-600 text-white px-5 md:px-8 py-3 rounded-full font-black text-sm md:text-base hover:bg-blue-500 transition-all shadow-xl active:translate-y-1">
+                   <i data-lucide="maximize" class="w-5 h-5"></i>
+                   <span class="hidden md:inline">PANTALLA COMPLETA</span>
+               </button>
+           </div>
+       </div>
+   </main>
+</div>
+
+<script>
+   const channels = [
+       { name: "VEO SANTA FE", url: "https://joy.nx-pc.edge-apps.net/hls/96blm-4g2p9-jim16-3b26n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345346/amrez8xvti7qszmwoorl.png", cat: "Local" },
+       { name: "TN", url: "https://joy.nx-pc.edge-apps.net/hls/719b8-4446k-bgh4e-5pp8f.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345069/wy5gze1xto6u7pzndpo4.png", cat: "Noticias" },
+       { name: "A24", url: "https://joy.nx-pc.edge-apps.net/hls/eh9gc-bail8-o30pk-k1hih.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344457/fcjc3stfsqmhfiwhg3gl.png", cat: "Noticias" },
+       { name: "C5N", url: "https://joy.nx-pc.edge-apps.net/hls/84aje-kf2n1-d1fjp-jd44i.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343205/svtomvm729gbibz9ofsq.png", cat: "Noticias" },
+       { name: "LN+", url: "https://joy.nx-pc.edge-apps.net/hls/aembp-3e3j8-epcp7-9n39b.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344457/fcjc3stfsqmhfiwhg3gl.png", cat: "Noticias" },
+       { name: "VEO SANTO TOME", url: "https://joy.nx-pc.edge-apps.net/hls/dnob-bh2e8-ie61h-da129.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345274/vvx5uc4yrteyyaa2w7mb.png", cat: "Local" },
+       { name: "CANAL 9 LITORAL", url: "https://joy.nx-pc.edge-apps.net/hls/c1l19-dm128-aophc-jlo6n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343169/jhcykgqwd6muxddjsi6b.png", cat: "Aire" },
+       { name: "CRONICA TV", url: "https://joy.nx-pc.edge-apps.net/hls/50l1p-9en4e-g05p7-n6588.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343495/lfiirtos0kntrahjmmro.png", cat: "Noticias" },
+       { name: "CANAL 26", url: "https://joy.nx-pc.edge-apps.net/hls/l4bk3-m0kk9-e914k-dm053.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343427/vhidvtxodaxhsijzvbok.png", cat: "Noticias" },
+       { name: "RTS", url: "https://joy.nx-pc.edge-apps.net/hls/8hdof-e4mmh-nbj00-biga5.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1714690363/e6qrjkrewqzvavedhic1.png", cat: "Santa Fe" },
+       { name: "IP Noticias", url: "https://joy.nx-pc.edge-apps.net/hls/hlo1k-hpi35-b12io-9ik48.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1714690363/e6qrjkrewqzvavedhic1.png", cat: "Noticias" },
+       { name: "TELEFE SANTA FE", url: "https://joy.nx-pc.edge-apps.net/hls/367dd-bmd9o-85ha8-f468n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345039/k7wex8tz5j0sazltjb1n.png", cat: "Aire" },
+       { name: "EL TRECE SATELITAL", url: "https://joy.nx-pc.edge-apps.net/hls/e5df7-k5p3m-2m2nf-jnd7m.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345193/qp8dffd1cy3u2guoqx.png", cat: "Aire" },
+       { name: "AMERICA TV", url: "https://joy.nx-pc.edge-apps.net/hls/6d4cm-ihgob-f3k27-31j97.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343193/yfswhrfentg6ldidmvkd.png", cat: "Aire" },
+       { name: "EL NUEVE", url: "https://joy.nx-pc.edge-apps.net/hls/nlpbp-d0k2m-gn1k-35cj1.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343409/r6vbn4n6dfsem4thbh7g.png", cat: "Aire" },
+       { name: "TV PUBLICA", url: "https://joy.nx-pc.edge-apps.net/hls/m4lf3-ad2jd-672pb-a46k9.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343316/lbquokaz3dmb2gtsynxh.png", cat: "Aire" },
+       { name: "NET TV", url: "https://joy.nx-pc.edge-apps.net/hls/lb0ol-ailc9-5k80-j4fj6.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345761/lrd1rhajbdywgjzhslkb.png", cat: "Aire" },
+       { name: "URBANA PLAY", url: "https://joy.nx-pc.edge-apps.net/hls/3dn0g-j9clp-hngk7-ki23g.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1744903581/xawt97jb550pdq5sxu0y.png", cat: "Variedad" },
+       { name: "CIUDAD MAGAZINE", url: "https://joy.nx-pc.edge-apps.net/hls/6i9pl-i9pbb-nlbod-db19m.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344483/ze80dpksdnhmtrrir0jy.png", cat: "Variedad" },
+       { name: "TYC SPORTS", url: "https://joy.nx-pc.edge-apps.net/hls/o5b6i-gacle-23i3p-oef1.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345246/bkxx3r33ra53vmbwc1qp.png", cat: "Deportes" },
+       { name: "FOX SPORTS", url: "https://joy.nx-pc.edge-apps.net/hls/e6m9n-cgl9e-o10kk-2o1bd.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344065/kq9nkzim7pr4yk6cgjja.png", cat: "Deportes" },
+       { name: "FOX SPORTS 2", url: "https://joy.nx-pc.edge-apps.net/hls/km6lk-2io4c-7f9jm-peep.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344086/ga6vdlikxfa3c8puixeq.png", cat: "Deportes" },
+       { name: "FOX SPORTS 3", url: "https://joy.nx-pc.edge-apps.net/hls/nhpm-b5ank-dc0f8-23dl8.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344107/fdnnmnk6gnmfoggvvh8t.png", cat: "Deportes" },
+       { name: "ESPN", url: "https://joy.nx-pc.edge-apps.net/hls/k6e4b-2jhe5-76pae-1fham.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343656/cxuieragbu4epuhxo7in.png", cat: "Deportes" },
+       { name: "ESPN 2", url: "https://joy.nx-pc.edge-apps.net/hls/io3a7-ob45b-2dnm5-ac8ak.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343621/dvoznks55wyxhidxt5tz.png", cat: "Deportes" },
+       { name: "ESPN 3", url: "https://joy.nx-pc.edge-apps.net/hls/io0j9-gb1bf-d0738-kkn17.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343670/ypj5fzsecjbhs6itvldj.png", cat: "Deportes" },
+       { name: "ESPN 4", url: "https://joy.nx-pc.edge-apps.net/hls/ohcfd-666pp-pkifp-28l43.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1708005521/wazxwdf0tycbg0qc6jwt.png", cat: "Deportes" },
+       { name: "GOLF CHANNEL", url: "https://joy.nx-pc.edge-apps.net/hls/3ng17-nl903-o8epk-9kaij.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345398/pjculxryvg0brhyewhoq.png", cat: "Deportes" },
+       { name: "CLARO SPORTS", url: "https://joy.nx-pc.edge-apps.net/hls/km95e-pj51p-m2ci4-5nj03.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346171/casvrwvzsaou1lrvdvyd.png", cat: "Deportes" },
+       { name: "DEPORTV", url: "https://joy.nx-pc.edge-apps.net/hls/e1okh-afcc2-ejm6-h8gdj.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1749237097/ktodxvqmqpbo1lhl452v.png", cat: "Deportes" },
+       { name: "CABLEVIDEO EVENTOS", url: "https://joy.nx-pc.edge-apps.net/hls/m8hok-nellb-e6mo6-n858e.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1747771091/p66yptgchm9w1mp2vlgd.png", cat: "Eventos" },
+       { name: "TNT SPORTS PREMIUM", url: "https://joy.nx-pc.edge-apps.net/hls/hg35c-k15n6-nn351-lje0m.m3u8", logo: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhFGKqUAU9_m8xAypVgs44ZuoQCaMoaXAMvLHC0YRY_bD6LLYCTFXLw18eYTN1zV2TkR1P3E4mIPlyYus7nOEkk0ws29Gc2uyQj-X_0-qvWsxa5NAGE7lnCsJMThrgOoBdE930AxpzpXQyHfkr2M3oBvFUvKXvTt-Yo-5uBmbHUTzwKntbgwJhcTrF0nEs/s200/472970723_600071056130905_7686830705336578560_n.png", cat: "Premium" },
+       { name: "ESPN PREMIUM", url: "https://joy.nx-pc.edge-apps.net/hls/56cl9-6dffj-hb9op-hik52.m3u8", logo: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEifAvhv6KpqU-k2oz-q8WYx-4xxhQ-VFb-6v6uE5w9e9xGiLTVqfnvuj_VLFJfhnQU3G6oZrGNupI5rv9WRM-_GSsZpi9zdqIpT2ZHMx0BOP7lev64k0FSzLWOGV1mHY1VmsOXENBihGDWlbO6Jy52LfGALpDEDiLU0NhPZziVvowWf0RvIX0xluoF_M-k/s200/789-removebg-preview.png", cat: "Premium" },
+       { name: "DISNEY CHANNEL", url: "https://joy.nx-pc.edge-apps.net/hls/g0hl8-7cc8c-58lnc-8d80n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343539/hbtoaryt4rspl7nuvo5f.png", cat: "Ni�os" },
+       { name: "DISNEY JR.", url: "https://joy.nx-pc.edge-apps.net/hls/5kd3c-o845m-1fce7-n8520.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343555/qquu2rgawhx5vewx5k5s.png", cat: "Ni�os" },
+       { name: "CARTOON NETWORK", url: "https://joy.nx-pc.edge-apps.net/hls/f33ci-2pl6j-7pki5-goboo.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343459/qeyq8c2njqjrpfvzwhmz.png", cat: "Ni�os" },
+       { name: "TOONCAST", url: "https://joy.nx-pc.edge-apps.net/hls/9649e-56dn4-4b1g5-dilf.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345162/dr9opo1wgzz6rjqestvs.png", cat: "Ni�os" },
+       { name: "ZOO MOO", url: "https://joy.nx-pc.edge-apps.net/hls/gpn0p-h6fp8-7689p-kkcc6.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345870/wz2y1iajjlrvbuajnsw9.png", cat: "Ni�os" },
+       { name: "PAKA PAKA", url: "https://joy.nx-pc.edge-apps.net/hls/fmk71-o60f6-lb4p-jbad9.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344683/o5wmeruzw6cwdozlkb64.png", cat: "Ni�os" },
+       { name: "BABY TV", url: "https://joy.nx-pc.edge-apps.net/hls/6onej-bja31-d1m6a-99and.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343332/k6apxdxseirljmuvoctg.png", cat: "Ni�os" },
+       { name: "CANAL INFANTIL", url: "https://joy.nx-pc.edge-apps.net/hls/d45pa-2lfp1-e8p5j-3k22i.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684348314/yvbj7oz3ujktnle6so2a.png", cat: "Ni�os" },
+       { name: "PLIM PLIM TV", url: "https://joy.nx-pc.edge-apps.net/hls/mb6hp-85n73-pedjc-o07ef.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1750353500/e02amybvvycqtiovtkxy.png", cat: "Ni�os" },
+       { name: "FX", url: "https://joy.nx-pc.edge-apps.net/hls/fag8a-om4eh-afl1m-78310.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1738861342/mxqccbweqij3th5jni3m.png", cat: "Cine" },
+       { name: "CINEMAX", url: "https://joy.nx-pc.edge-apps.net/hls/al2ac-boi6d-kl95l-3n20j.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344640/awvuauzeynupv9g4w55w.png", cat: "Cine" },
+       { name: "MULTIPREMIER", url: "https://joy.nx-pc.edge-apps.net/hls/k9bpa-nd884-2a06l-640e1.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346044/hzxoskqpdbco2grcfs1k.png", cat: "Cine" },
+       { name: "CINECANAL", url: "https://joy.nx-pc.edge-apps.net/hls/6bhnd-ee8d5-hegm2-b6l5e.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346192/wlqczqrkvqmrr4khdekf.png", cat: "Cine" },
+       { name: "TNT", url: "https://joy.nx-pc.edge-apps.net/hls/3cfmo-i74jf-j0b2a-bm53n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345114/pe7pbo0c5bycumcxxcdf.png", cat: "Cine" },
+       { name: "EUROPA EUROPA", url: "https://joy.nx-pc.edge-apps.net/hls/caon2-ko5ei-l3gpc-e772c.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1738069963/jyv6t42pjooaxfefm25e.png", cat: "Cine" },
+       { name: "FILM & ARTS", url: "https://joy.nx-pc.edge-apps.net/hls/9nf94-h29hf-eme9n-iga8e.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346138/os0793nnsdcby18gttcg.png", cat: "Cine" },
+       { name: "GOLDEN", url: "https://joy.nx-pc.edge-apps.net/hls/3ndhm-1aci9-g528l-oblaf.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345548/waykhtjrltosfh3wiqkl.png", cat: "Cine" },
+       { name: "AMC", url: "https://joy.nx-pc.edge-apps.net/hls/bi2ih-e4ike-kb3hi-4fhf5.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344432/rpwhd2jsw6f45i468bew.png", cat: "Cine" },
+       { name: "STAR CHANNEL", url: "https://joy.nx-pc.edge-apps.net/hls/4o7n1-6ig88-demj0-46pkf.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343392/ta0eesxgcjxhxhikcxyo.png", cat: "Cine" },
+       { name: "WARNER CHANNEL", url: "https://joy.nx-pc.edge-apps.net/hls/f068d-i2ab-je8pf-3k75a.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345322/xagr6s4ajzppkxqk9gna.png", cat: "Cine" },
+       { name: "TNT SERIES", url: "https://joy.nx-pc.edge-apps.net/hls/o7hff-5j8a5-kfh7n-focci.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345574/crvpq9vwaupct2wumr9l.png", cat: "Cine" },
+       { name: "TNT NOVELAS", url: "https://joy.nx-pc.edge-apps.net/hls/dk7p1-42odm-8n3cb-cnc2l.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1689266233/wyegs5ojarqf4qonqjp0.png", cat: "Novelas" },
+       { name: "SPACE", url: "https://joy.nx-pc.edge-apps.net/hls/5l99a-88i70-g4mhk-k4ob4.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344768/jr9kvm8tcjv7aiqblavz.png", cat: "Cine" },
+       { name: "VOLVER", url: "https://joy.nx-pc.edge-apps.net/hls/9c3on-i089p-mnmkk-jpi5f.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345294/e2f2jre2m3ydeaevxczs.png", cat: "Cine" },
+       { name: "CINE.AR", url: "https://joy.nx-pc.edge-apps.net/hls/m6l52-i7flc-5bii9-70gkm.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345516/udplad6zrky9yvhyhat5.png", cat: "Cine" },
+       { name: "TCM", url: "https://joy.nx-pc.edge-apps.net/hls/61h62-gfdg8-5eb9c-c3og.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345600/btr9auc3hlqghyu7e7z0.png", cat: "Cine" },
+       { name: "STAR TVE", url: "https://joy.nx-pc.edge-apps.net/hls/k4jn-k8e9h-i267a-acckf.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346330/dugkog0m3cpan5ct2w2k.png", cat: "Cine" },
+       { name: "A3SERIES", url: "https://joy.nx-pc.edge-apps.net/hls/e2f1o-66f4a-9m7dn-aphj2.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1682169146/ztlcxgcuqiquwpljsfut.png", cat: "Novelas" },
+       { name: "A3CINE", url: "https://joy.nx-pc.edge-apps.net/hls/kpnai-5f8d4-1pmch-5h5oe.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1682169336/gwe0estuudnrotgm0a1t.png", cat: "Cine" },
+       { name: "LAS ESTRELLAS", url: "https://joy.nx-pc.edge-apps.net/hls/7o81a-4egdo-2noga-l5o6k.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343712/x8gr1lfymel9mphjsilz.png", cat: "Novelas" },
+       { name: "RCN NOVELAS", url: "https://joy.nx-pc.edge-apps.net/hls/d89mh-phk3-5cmmm-343i3.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684348415/qg7endigoqpzeq4mgbvu.png", cat: "Novelas" },
+       { name: "PASIONES", url: "https://joy.nx-pc.edge-apps.net/hls/52eb-m1lik-hb373-d4bn1.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346766/k7fwhb1tfjjmzjwj0ydu.png", cat: "Novelas" },
+       { name: "NOVELISIMA", url: "https://joy.nx-pc.edge-apps.net/hls/jlg10-a783n-d578n-mo8ch.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1750785888/tbxfsnmbgjbsielt5job.png", cat: "Novelas" },
+       { name: "KANAL D DRAMA", url: "https://joy.nx-pc.edge-apps.net/hls/i37hj-60mnd-n2kjo-2bljm.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1720111155/uja0cmn8jgkhlnaj0ylf.png", cat: "Novelas" },
+       { name: "HBO", url: "https://joy.nx-pc.edge-apps.net/hls/89ak-8f1hh-275b9-3ejih.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344148/ydjbqizsk5ivxmecww98.png", cat: "HBO Premium" },
+       { name: "HBO 2", url: "https://joy.nx-pc.edge-apps.net/hls/gl2pf-fm42m-ik7ec-acg1b.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344172/ytykblekpiypt6ispkcf.png", cat: "HBO Premium" },
+       { name: "HBO +", url: "https://joy.nx-pc.edge-apps.net/hls/o4k9f-ola22-20be9-69jo9.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344200/cizhn0isnfauczmybgop.png", cat: "HBO Premium" },
+       { name: "HBO POP", url: "https://joy.nx-pc.edge-apps.net/hls/le3g2-kjc00-e7d3p-m3aoc.m3aoc", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345430/sj8snppqk04loiqjaaqm.png", cat: "HBO Premium" },
+       { name: "HBO XTREME", url: "https://joy.nx-pc.edge-apps.net/hls/5o27b-5alop-lcagn-834c8.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344622/fmxc4uqlul9uqc3pcmxh.png", cat: "HBO Premium" },
+       { name: "HBO MUNDI", url: "https://joy.nx-pc.edge-apps.net/hls/c5o8j-78n4c-apc1g-j3ph5.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344600/z0ecxrdo1hm2paiy4vab.png", cat: "HBO Premium" },
+       { name: "HBO FAMILY", url: "https://joy.nx-pc.edge-apps.net/hls/mcl11-2ja70-fnhg5-coojh.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344187/kzwx3nq6xbfdtbeobib5.png", cat: "HBO Premium" },
+       { name: "HBO SIGNATURE", url: "https://joy.nx-pc.edge-apps.net/hls/89n4a-hpa03-mpaah-1jdi4.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344220/rtvwm504qp58fuhwwrdn.png", cat: "HBO Premium" },
+       { name: "CINE PREMIUM", url: "https://joy.nx-pc.edge-apps.net/hls/d4bhf-fflam-b5fon-7kcff.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345688/s1gwqr9b7ipbxy4jm2cp.png", cat: "Cine" },
+       { name: "CINE FAMILIAR", url: "https://joy.nx-pc.edge-apps.net/hls/14nj5-o3nib-lfdgo-ha1ib.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345713/ikagari0fl7tttbrotfb.png", cat: "Cine" },
+       { name: "CINE HISPANO", url: "https://joy.nx-pc.edge-apps.net/hls/pf7b-4746p-o4dp5-5angp.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345736/dustkhfhwtbduu0zrl5n.png", cat: "Cine" },
+       { name: "DHE", url: "https://joy.nx-pc.edge-apps.net/hls/la1m9-hcg1p-8hcme-1lk16.m3u8", logo: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgcDmRkdIMcNM8GEajhM_SxqrX4TR3xWtJA_pApMUNEnVI8qGBvb_rjAUOwmZ3_VAE7VIRMBmxvxrXzj7U6kDU9qRIUCQKeORIxhDElltMI_P0e1dHgBQ8bWI49ah79c78ZJsH5-K4mLZ2-cJWt3mWQ1TfVnkRRIwEELPK8zX0WkZ2qb3bJJnOWbs6ushI/s320/DHE.png", cat: "Cine" },
+       { name: "HOLA TV", url: "https://joy.nx-pc.edge-apps.net/hls/cl7lf-54530-2egee-p14da.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345815/asgjcf2jzh98oxnxkqx9.png", cat: "Variedad" },
+       { name: "CARAS TV", url: "https://joy.nx-pc.edge-apps.net/hls/na8aa-7l8ko-4gd7d-p3613.m3u8", logo: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgtIazZ8-vJfSsbLwDLCdObeZ1M1-y78lktWOBEA9WBonr5xSMX00soYe2vwGg6TlPBc8Z53Ef43VNxNHZTW-0FwDxcwLCwomnIipVmka4qD0_Xb_VyWJw44jEox3DXcOwi7bbOc9bBvzJDi0bv0OOZYj9xEDbqZdvRXfas_q6V5KhCs_hTGOGoSsk2WXo/s200/CYaZv3N-removebg-preview.png", cat: "Variedad" },
+       { name: "MAS CHIC", url: "https://joy.nx-pc.edge-apps.net/hls/f9em3-fn7h4-a75fc-c056h.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346112/bkkh1cckle09ey0yqvyx.png", cat: "Variedad" },
+       { name: "EL GOURMET", url: "https://joy.nx-pc.edge-apps.net/hls/hhdd2-k3ik5-m2ha3-1b8pb.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343608/ywvhapelbx9i9pv9y9bu.png", cat: "Cocina" },
+       { name: "DISCOVERY HOME&HEALTH", url: "https://joy.nx-pc.edge-apps.net/hls/5ea6f-88j6g-p7811-p312n.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344394/cq5nr0zp7kdh1mdi2mrv.png", cat: "Variedad" },
+       { name: "TRAVEL XP", url: "https://joy.nx-pc.edge-apps.net/hls/hp6dm-89cho-6n1l-5f64l.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684347549/lh2ojz3jqohgkhbdmpkf.png", cat: "Documentales" },
+       { name: "NATGEO", url: "https://joy.nx-pc.edge-apps.net/hls/o6mj8-i7n93-67ej8-712ao.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344660/ljfeibwcia0jp57u8v1a.png", cat: "Documentales" },
+       { name: "LOVE NATURE", url: "https://joy.nx-pc.edge-apps.net/hls/f2ljo-jb10f-fjjfe-622fg.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345917/n2qqptz2k27lp759s2it.png", cat: "Documentales" },
+       { name: "DISCOVERY TLC", url: "https://joy.nx-pc.edge-apps.net/hls/feo4p-6m8di-39pf4-j1h25.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1749408442/tgphkhbrgddkeznerscl.png", cat: "Documentales" },
+       { name: "GUSTO TV", url: "https://joy.nx-pc.edge-apps.net/hls/jp51l-235gf-a6d71-e522k.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1750688691/xi9rhjpxp1pqiokwfqqd.png", cat: "Cocina" },
+       { name: "SUN CHANNEL", url: "https://joy.nx-pc.edge-apps.net/hls/7oj3g-cdej2-kl131-b7hd8.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1750353395/zjn2noajhrjd7ggxv31l.webp", cat: "Variedad" },
+       { name: "ENCUENTRO", url: "https://joy.nx-pc.edge-apps.net/hls/9bh05-pfjmo-a54l8-a4hgk.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346279/zzju24oya4wvydk1rixe.png", cat: "Cultura" },
+       { name: "CANAL A", url: "https://joy.nx-pc.edge-apps.net/hls/k0eh2-j12j2-35nn-1dmde.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684348098/nvcumj4q8bkqiryclisr.png", cat: "Cultura" },
+       { name: "CANAL RURAL", url: "https://joy.nx-pc.edge-apps.net/hls/465a1-enb61-ad17j-55bp2.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344744/pqumpg7ubdiyzmozdwsr.png", cat: "Campo" },
+       { name: "CNN EN ESPA�OL", url: "https://joy.nx-pc.edge-apps.net/hls/d0l95-h7jlf-ilii6-4e3g9.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684343477/jpaigp1p0weik0s8red0.png", cat: "Noticias" },
+       { name: "EURONEWS", url: "https://joy.nx-pc.edge-apps.net/hls/eo5mp-m89lb-e57f0-kpkkd.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345964/f7zdzojarsngu4fqqlsk.png", cat: "Noticias" },
+       { name: "DW", url: "https://joy.nx-pc.edge-apps.net/hls/57gjj-j2867-pfa7f-d52jp.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345941/g93i18rqzqekt6g2an5x.png", cat: "Noticias" },
+       { name: "RAI ITALIA", url: "https://joy.nx-pc.edge-apps.net/hls/pblci-34e1c-fgf30-h25ib.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344717/pcsili7bymriuh3ohuvu.png", cat: "Internacional" },
+       { name: "TVE", url: "https://joy.nx-pc.edge-apps.net/hls/bc91i-kj0of-4eh3g-hlfn1.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684345221/qa3wlkvpshquf7q4co8a.png", cat: "Internacional" },
+       { name: "CANAL 24H", url: "https://joy.nx-pc.edge-apps.net/hls/h7m22-llhbf-mkh78-f4eo6.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684348695/ygs1l09aiaxf4ygejvxl.png", cat: "Noticias" },
+       { name: "DNEWS", url: "https://joy.nx-pc.edge-apps.net/hls/cp9g2-5ok8b-g99na-o15il.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1737634193/xgs69thn3o5y3d9r9mzr.png", cat: "Noticias" },
+       { name: "RT EN ESPA�OL", url: "https://joy.nx-pc.edge-apps.net/hls/1pf1o-l8fhp-a55hc-1j09k.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1746530729/fchli6dxupqmekgkhadb.png", cat: "Noticias" },
+       { name: "LA VITROLA TV", url: "https://stmvideo6.livecastv.com/vitrola4/vitrola4/index.m3u8", logo: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgYQcbi69eNEjfxRe88kGK04lsj0unkBWv0py6z4Bw898zzWV-fR9giKaWqBxIFIHl8ocemSD7F2kckjvQKIC4RNaJXI6VaVgUtghQdnYyVu8hQDKbWJRJAD7VoEtno9XoPAkI1Okte3x5eMAgQfSV8LbcyQlwdYVN7SyDdXjs_zv5S5ZzBAJSo4bX9MjE/s200/La%20Vitrola%20TV.png", cat: "Variedad" },
+       { name: "CM", url: "https://joy.nx-pc.edge-apps.net/hls/i7gnj-ipp8m-bc68e-ad3hd.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684344575/yd4t3x3rbewslfiypwdp.png", cat: "M�sica" },
+       { name: "HTV", url: "https://joy.nx-pc.edge-apps.net/hls/l4b0l-njg9j-4ic97-4c15b.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346215/v83epbwjwd9o2fspi3ud.png", cat: "M�sica" },
+       { name: "QUIERO MUSICA", url: "https://joy.nx-pc.edge-apps.net/hls/3la6l-e802j-1ekem-6k9o6.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346240/iva94ooqr6f8kvptmgmr.png", cat: "M�sica" },
+       { name: "RADIO NACIONAL FOLKLORICA", url: "https://ice3.edge-apps.net/joy-radios/folklorica/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716504959/radios/appJOY/Logo_NacionalFolklorica_ixubqd.png", cat: "Radio" },
+       { name: "RADIO POWER MAX", url: "https://joy.nx-pc.edge-apps.net/hls/mp8nj-mhh72-7apb0-81bp4.m3u8", logo: "http://res.cloudinary.com/doj39auqi/image/upload/v1684346010/b6kr0ffmk2j8e1pkswsv.png", cat: "Radio" },
+       { name: "RADIO NACIONAL ROCK", url: "https://ice3.edge-apps.net/joy-radios/rocknacional/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716511459/radios/appJOY/Logo_NacionalRock_hnhjgz.png", cat: "Radio" },
+       { name: "RADIO VORTERIX", url: "https://prepublish.f.qaotic.net/a08/ngrp:vorterix_video1-20057_all/Playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1714824281/radios/vorterix_jpupkx.png", cat: "Radio" },
+       { name: "RADIO 2 ROSARIO", url: "https://ice3.edge-apps.net/joy-radios/radio2/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716511233/radios/appJOY/Logo_Radio2_hz2fih.png", cat: "Radio" },
+       { name: "FM VIDA ROSARIO", url: "https://ice3.edge-apps.net/joy-radios/fmvida/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716504884/radios/appJOY/Logo_FmVida_oftcf9.png", cat: "Radio" },
+       { name: "NACIONAL AM870", url: "https://ice3.edge-apps.net/joy-radios/am870/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716511414/radios/appJOY/Logo_AM870_kyslsa.png", cat: "Radio" },
+       { name: "RADIO NACIONAL CLASICA", url: "https://ice3.edge-apps.net/joy-radios/clasica/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1716504906/radios/appJOY/Logo_NacionalClasica_urqkxf.png", cat: "Radio" },
+       { name: "FM PLUS ROSARIO", url: "https://ice3.edge-apps.net/joy-radios/frecuencia_plus/playlist.m3u8", logo: "https://res.cloudinary.com/doj39auqi/image/upload/v1714824501/radios/logo_fmplus_br21jy.png", cat: "Radio" }
+   ];
+
+   const video = document.getElementById('mainVideo');
+   const hls = new Hls();
+
+   function loadChannels(filter = "") {
+       const container = document.getElementById('channelList');
+       container.innerHTML = "";
+      
+       channels.filter(c => c.name.toLowerCase().includes(filter.toLowerCase())).forEach(ch => {
+           const btn = document.createElement('div');
+           btn.className = "flex items-center gap-4 p-3 rounded-xl cursor-pointer hover:bg-zinc-900 transition-all border border-transparent hover:border-zinc-800 group mb-1";
+           btn.innerHTML = `
+               <div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center overflow-hidden p-1 shadow-md group-hover:scale-110 transition-transform">
+                    <img src="${ch.logo}" class="max-h-full object-contain">
+               </div>
+               <div class="flex-1">
+                   <p class="font-bold text-zinc-100 text-sm truncate">${ch.name}</p>
+                   <p class="text-[9px] text-zinc-500 uppercase tracking-widest">${ch.cat}</p>
+               </div>
+           `;
+           btn.onclick = () => {
+               document.querySelectorAll('.active-channel').forEach(el => el.classList.remove('active-channel'));
+               btn.classList.add('active-channel');
+               playSource(ch);
+           };
+           container.appendChild(btn);
+       });
+   }
+
+   function playSource(ch) {
+       document.getElementById('playerTitle').innerText = ch.name;
+       document.getElementById('currentCat').innerText = ch.cat;
+       document.getElementById('currentLogo').src = ch.logo;
+       document.getElementById('currentLogo').style.display = 'block';
+       document.getElementById('loader').classList.remove('hidden');
+
+       if (Hls.isSupported()) {
+           hls.loadSource(ch.url);
+           hls.attachMedia(video);
+           hls.on(Hls.Events.MANIFEST_PARSED, () => {
+               video.play();
+               document.getElementById('loader').classList.add('hidden');
+           });
+       } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+           video.src = ch.url;
+           video.play();
+           video.addEventListener('loadedmetadata', () => {
+               document.getElementById('loader').classList.add('hidden');
+           });
+       }
+       updateIcons('pause');
+   }
+
+   function handleFullscreen() {
+       const p = document.getElementById('player-section');
+       if (!document.fullscreenElement) {
+           p.requestFullscreen().then(() => {
+               if (screen.orientation && screen.orientation.lock) {
+                   screen.orientation.lock('landscape').catch(() => {
+                       console.log("Rotaci�n no permitida por el navegador");
+                   });
+               }
+           });
+       } else {
+           document.exitFullscreen();
+           if (screen.orientation && screen.orientation.unlock) {
+               screen.orientation.unlock();
+           }
+       }
+   }
+
+   function togglePlay() {
+       if (video.paused) { 
+           video.play();
+           updateIcons('pause'); 
+       } else { 
+           video.pause(); 
+           updateIcons('play');
+       }
+   }
+
+   function updateIcons(state) {
+       document.getElementById('playBtn').setAttribute('data-lucide', state);
+       lucide.createIcons();
+   }
+
+   function setVolume(v) { 
+       video.volume = v; 
+   }
+
+   document.getElementById('searchInput').oninput = (e) => loadChannels(e.target.value);
+   
+   // Inicializaci�n
+   loadChannels();
+   lucide.createIcons();
+
+   // Auto-ocultar UI
+   let timer;
+   document.getElementById('player-section').onmousemove = () => {
+       const controls = document.querySelectorAll('.video-gradient-top, .video-gradient-bottom');
+       controls.forEach(c => c.style.opacity = "1");
+       clearTimeout(timer);
+       timer = setTimeout(() => {
+           if(!video.paused) controls.forEach(c => c.style.opacity = "0");
+       }, 3500);
+   };
+</script>
+</body>
+</html>
